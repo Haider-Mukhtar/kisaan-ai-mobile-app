@@ -15,6 +15,7 @@ type OnboardingContextValue = {
   isComplete: boolean;
   isReady: boolean;
   markComplete: () => Promise<void>;
+  resetOnboarding: () => Promise<void>;
 };
 
 const OnboardingContext = createContext<OnboardingContextValue | undefined>(
@@ -51,9 +52,14 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
     setIsComplete(true);
   }, []);
 
+  const resetOnboarding = useCallback(async () => {
+    await AsyncStorage.removeItem(STORAGE_KEY).catch(() => undefined);
+    setIsComplete(false);
+  }, []);
+
   const value = useMemo(
-    () => ({ isComplete, isReady, markComplete }),
-    [isComplete, isReady, markComplete],
+    () => ({ isComplete, isReady, markComplete, resetOnboarding }),
+    [isComplete, isReady, markComplete, resetOnboarding],
   );
 
   return (

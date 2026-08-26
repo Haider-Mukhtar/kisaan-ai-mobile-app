@@ -25,5 +25,7 @@
   "finishSetup": "Finish setup",
   "saving": "Saving...",
   "setupSavedTitle": "Your preferences are ready",
-  "setupSavedDescription": "Kisaan AI will remember your language and appearance on your next visit."
+  "setupSavedDescription": "Kisaan AI will remember your language and appearance on your next visit.",
+  "resetOnboarding": "Test onboarding again",
+  "resettingOnboarding": "Opening onboarding..."
 }

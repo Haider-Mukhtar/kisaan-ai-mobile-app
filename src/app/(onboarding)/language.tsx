@@ -43,6 +43,7 @@ export default function LanguageOnboardingScreen() {
       step={4}
       title={t("onboardingLanguageTitle")}
       description={t("onboardingLanguageDescription")}
+      onBack={() => router.back()}
       footer={
         <OnboardingButton
           label={t("continue")}

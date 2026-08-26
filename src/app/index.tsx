@@ -1,12 +1,25 @@
-import { StyleSheet, View } from "react-native";
+import { useState } from "react";
+import { Pressable, StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
+import { useOnboarding } from "@/providers/onboarding-provider";
 
 export default function Index() {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
+  const { resetOnboarding } = useOnboarding();
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetOnboarding = async () => {
+    if (isResetting) {
+      return;
+    }
+
+    setIsResetting(true);
+    await resetOnboarding();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -37,6 +50,28 @@ export default function Index() {
           {t("welcomeSubtitle")}
         </AppText>
       </View>
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={isResetting}
+        onPress={() => void handleResetOnboarding()}
+        style={({ pressed }) => [
+          styles.resetButton,
+          {
+            backgroundColor: colors.primary,
+            borderColor: colors.primaryDark,
+          },
+          pressed && styles.resetButtonPressed,
+          isResetting && styles.resetButtonDisabled,
+        ]}
+      >
+        <AppText
+          variant="label"
+          style={[styles.resetButtonText, { color: colors.primaryForeground }]}
+        >
+          {isResetting ? t("resettingOnboarding") : t("resetOnboarding")}
+        </AppText>
+      </Pressable>
     </View>
   );
 }
@@ -83,5 +118,28 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     lineHeight: 24,
+  },
+  resetButton: {
+    alignItems: "center",
+    borderRadius: 18,
+    borderWidth: 1,
+    marginTop: 18,
+    maxWidth: 420,
+    minHeight: 56,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    width: "100%",
+  },
+  resetButtonText: {
+    fontSize: 15,
+    lineHeight: 25,
+    textAlign: "center",
+  },
+  resetButtonPressed: {
+    opacity: 0.84,
+    transform: [{ scale: 0.99 }],
+  },
+  resetButtonDisabled: {
+    opacity: 0.55,
   },
 });

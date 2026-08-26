@@ -25,5 +25,7 @@
   "finishSetup": "ترتیب مکمل کریں",
   "saving": "محفوظ ہو رہا ہے۔۔۔",
   "setupSavedTitle": "آپ کی ترجیحات محفوظ ہیں",
-  "setupSavedDescription": "کسان اے آئی اگلی بار بھی آپ کی زبان اور ظاہری انداز یاد رکھے گا۔"
+  "setupSavedDescription": "کسان اے آئی اگلی بار بھی آپ کی زبان اور ظاہری انداز یاد رکھے گا۔",
+  "resetOnboarding": "آن بورڈنگ دوبارہ آزمائیں",
+  "resettingOnboarding": "آن بورڈنگ کھل رہی ہے۔۔۔"
 }
