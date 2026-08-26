@@ -8,13 +8,14 @@ import {
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Inter_400Regular, Inter_600SemiBold } from "@expo-google-fonts/inter";
 import { NotoNaskhArabic_400Regular } from "@expo-google-fonts/noto-naskh-arabic";
 import { NotoNastaliqUrdu_400Regular } from "@expo-google-fonts/noto-nastaliq-urdu";
 import { NotoSansArabic_600SemiBold } from "@expo-google-fonts/noto-sans-arabic";
 
+import AppSplashScreen from "@/components/splash-screen";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import {
@@ -58,8 +59,27 @@ export default function RootLayout() {
 }
 
 function ThemedRootLayout() {
-  const { colors, effectiveTheme, isDarkMode } = useThemeManager();
-  const { direction, fonts } = useLanguage();
+  const {
+    colors,
+    effectiveTheme,
+    isDarkMode,
+    isReady: isThemeReady,
+  } = useThemeManager();
+  const {
+    direction,
+    fonts,
+    isReady: isLanguageReady,
+  } = useLanguage();
+  const [minSplashElapsed, setMinSplashElapsed] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMinSplashElapsed(true), 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const showSplash = 
+    !minSplashElapsed || !isThemeReady || !isLanguageReady;
 
   const baseTheme = effectiveTheme === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme: Theme = {
@@ -78,16 +98,20 @@ function ThemedRootLayout() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={[styles.app, { direction }]}>
-        <Stack
-          screenOptions={{
-            contentStyle: { backgroundColor: colors.background },
-            headerStyle: { backgroundColor: colors.card },
-            headerTintColor: colors.foreground,
-            headerTitleStyle: { fontFamily: fonts.label },
-          }}
-        />
+        {showSplash ? (
+          <AppSplashScreen />
+        ) : (
+          <Stack
+            screenOptions={{
+              contentStyle: { backgroundColor: colors.background },
+              headerStyle: { backgroundColor: colors.card },
+              headerTintColor: colors.foreground,
+              headerTitleStyle: { fontFamily: fonts.label },
+            }}
+          />
+        )}
       </View>
-      <StatusBar style={isDarkMode ? "light" : "dark"} />
+      <StatusBar style={showSplash || isDarkMode ? "light" : "dark"} />
     </NavigationThemeProvider>
   );
 }

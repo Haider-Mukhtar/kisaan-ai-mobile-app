@@ -10,5 +10,6 @@
   "themeSystem": "سسٹم",
   "themeLight": "روشن",
   "themeDark": "تاریک",
-  "currentTheme": "اس وقت {{theme}} تھیم استعمال ہو رہی ہے"
+  "currentTheme": "اس وقت {{theme}} تھیم استعمال ہو رہی ہے",
+  "splashLoading": "لوڈ ہو رہا ہے۔۔۔"
 }

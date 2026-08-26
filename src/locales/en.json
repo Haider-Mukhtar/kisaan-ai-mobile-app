@@ -10,5 +10,6 @@
   "themeSystem": "System",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "currentTheme": "Currently using the {{theme}} theme"
+  "currentTheme": "Currently using the {{theme}} theme",
+  "splashLoading": "Loading..."
 }
