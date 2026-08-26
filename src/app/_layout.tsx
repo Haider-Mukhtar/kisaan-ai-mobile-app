@@ -10,6 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Inter_400Regular, Inter_600SemiBold } from "@expo-google-fonts/inter";
 import { NotoNaskhArabic_400Regular } from "@expo-google-fonts/noto-naskh-arabic";
 import { NotoNastaliqUrdu_400Regular } from "@expo-google-fonts/noto-nastaliq-urdu";
@@ -22,6 +23,10 @@ import {
   LanguageProvider,
   useLanguage,
 } from "@/providers/language-provider";
+import {
+  OnboardingProvider,
+  useOnboarding,
+} from "@/providers/onboarding-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -50,11 +55,15 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <ThemedRootLayout />
-      </LanguageProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <OnboardingProvider>
+            <ThemedRootLayout />
+          </OnboardingProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 
@@ -70,6 +79,10 @@ function ThemedRootLayout() {
     fonts,
     isReady: isLanguageReady,
   } = useLanguage();
+  const {
+    isComplete: isOnboardingComplete,
+    isReady: isOnboardingReady,
+  } = useOnboarding();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -78,8 +91,11 @@ function ThemedRootLayout() {
     return () => clearTimeout(timer);
   }, []);
 
-  const showSplash = 
-    !minSplashElapsed || !isThemeReady || !isLanguageReady;
+  const showSplash =
+    !minSplashElapsed ||
+    !isThemeReady ||
+    !isLanguageReady ||
+    !isOnboardingReady;
 
   const baseTheme = effectiveTheme === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme: Theme = {
@@ -104,11 +120,19 @@ function ThemedRootLayout() {
           <Stack
             screenOptions={{
               contentStyle: { backgroundColor: colors.background },
+              headerShown: false,
               headerStyle: { backgroundColor: colors.card },
               headerTintColor: colors.foreground,
               headerTitleStyle: { fontFamily: fonts.label },
             }}
-          />
+          >
+            <Stack.Protected guard={!isOnboardingComplete}>
+              <Stack.Screen name="(onboarding)" />
+            </Stack.Protected>
+            <Stack.Protected guard={isOnboardingComplete}>
+              <Stack.Screen name="index" />
+            </Stack.Protected>
+          </Stack>
         )}
       </View>
       <StatusBar style={showSplash || isDarkMode ? "light" : "dark"} />

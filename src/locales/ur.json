@@ -11,5 +11,19 @@
   "themeLight": "روشن",
   "themeDark": "تاریک",
   "currentTheme": "اس وقت {{theme}} تھیم استعمال ہو رہی ہے",
-  "splashLoading": "لوڈ ہو رہا ہے۔۔۔"
+  "splashLoading": "لوڈ ہو رہا ہے۔۔۔",
+  "onboardingStep": "{{total}} میں سے {{current}}",
+  "onboardingLanguageTitle": "اپنی زبان منتخب کریں",
+  "onboardingLanguageDescription": "وہ زبان منتخب کریں جس میں آپ کسان اے آئی استعمال کرنا چاہتے ہیں۔ تبدیلی فوراً نظر آئے گی۔",
+  "onboardingThemeTitle": "اپنی پسند کا انداز چُنیں",
+  "onboardingThemeDescription": "دن یا رات، کھیت میں استعمال کے لیے اپنی آنکھوں کو آرام دہ انداز منتخب کریں۔",
+  "themeSystemDescription": "فون کی ترتیب کے مطابق خودکار انداز",
+  "themeLightDescription": "دن کے وقت روشن اور واضح انداز",
+  "themeDarkDescription": "کم روشنی میں آنکھوں کے لیے آرام دہ",
+  "continue": "اگلا مرحلہ",
+  "back": "واپس",
+  "finishSetup": "ترتیب مکمل کریں",
+  "saving": "محفوظ ہو رہا ہے۔۔۔",
+  "setupSavedTitle": "آپ کی ترجیحات محفوظ ہیں",
+  "setupSavedDescription": "کسان اے آئی اگلی بار بھی آپ کی زبان اور ظاہری انداز یاد رکھے گا۔"
 }

@@ -11,5 +11,19 @@
   "themeLight": "Light",
   "themeDark": "Dark",
   "currentTheme": "Currently using the {{theme}} theme",
-  "splashLoading": "Loading..."
+  "splashLoading": "Loading...",
+  "onboardingStep": "{{current}} of {{total}}",
+  "onboardingLanguageTitle": "Choose your language",
+  "onboardingLanguageDescription": "Select the language you want Kisaan AI to use. You can see the change immediately.",
+  "onboardingThemeTitle": "Make it feel like yours",
+  "onboardingThemeDescription": "Choose an appearance that feels comfortable in the field, day or night.",
+  "themeSystemDescription": "Automatically match your phone",
+  "themeLightDescription": "Bright and clear for daytime use",
+  "themeDarkDescription": "Easy on the eyes in low light",
+  "continue": "Continue",
+  "back": "Back",
+  "finishSetup": "Finish setup",
+  "saving": "Saving...",
+  "setupSavedTitle": "Your preferences are ready",
+  "setupSavedDescription": "Kisaan AI will remember your language and appearance on your next visit."
 }
