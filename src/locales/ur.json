@@ -1,0 +1,14 @@
+{
+  "appName": "کسان اے آئی",
+  "welcomeTitle": "آپ کا زرعی ساتھی",
+  "welcomeSubtitle": "صحت مند فصلوں اور بہتر فیصلوں کے لیے آسان اور قابلِ اعتماد رہنمائی حاصل کریں۔",
+  "languageTitle": "زبان",
+  "languagePrompt": "وہ زبان منتخب کریں جس میں آپ آسانی محسوس کرتے ہیں۔",
+  "languageEnglish": "انگریزی",
+  "languageUrdu": "اردو",
+  "appearanceTitle": "ظاہری انداز",
+  "themeSystem": "سسٹم",
+  "themeLight": "روشن",
+  "themeDark": "تاریک",
+  "currentTheme": "اس وقت {{theme}} تھیم استعمال ہو رہی ہے"
+}

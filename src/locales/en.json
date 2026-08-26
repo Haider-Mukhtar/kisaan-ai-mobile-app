@@ -1,0 +1,14 @@
+{
+  "appName": "Kisaan AI",
+  "welcomeTitle": "Your farming companion",
+  "welcomeSubtitle": "Get simple, reliable guidance for healthier crops and better decisions.",
+  "languageTitle": "Language",
+  "languagePrompt": "Choose the language you are most comfortable using.",
+  "languageEnglish": "English",
+  "languageUrdu": "Urdu",
+  "appearanceTitle": "Appearance",
+  "themeSystem": "System",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "currentTheme": "Currently using the {{theme}} theme"
+}
