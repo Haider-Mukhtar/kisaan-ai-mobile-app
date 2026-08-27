@@ -6,12 +6,15 @@ import useThemeManager from "@/hooks/use-theme-manager";
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useOnboarding } from "@/providers/onboarding-provider";
+import { useProfile } from "@/providers/profile-provider";
+import { formatPakistaniMobile } from "@/utils/phone";
 
 export default function Index() {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
   const { resetOnboarding } = useOnboarding();
-  const { isAuthenticated, isBusy, signOut, user } = useAuth();
+  const { isAuthenticated, isBusy, signOut } = useAuth();
+  const { profile } = useProfile();
   const [isResetting, setIsResetting] = useState(false);
 
   const handleResetOnboarding = async () => {
@@ -64,8 +67,10 @@ export default function Index() {
           ]}
         />
         <AppText style={[styles.readyText, { color: colors.cardForeground }]}>
-          {isAuthenticated && user?.email
-            ? t("authSignedInAs", { email: user.email })
+          {isAuthenticated && profile?.phone
+            ? t("authSignedInWithPhone", {
+                phone: formatPakistaniMobile(profile.phone),
+              })
             : t("authSignedOutStatus")}
         </AppText>
       </View>

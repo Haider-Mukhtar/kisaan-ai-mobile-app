@@ -24,6 +24,7 @@ import {
   getAuthErrorFallbackMessage,
   getAuthErrorTranslationKey,
 } from "@/services/supabase/errors";
+import { signInWithPhone as signInWithPhoneRequest } from "@/services/supabase/phone-auth";
 import {
   showErrorToast,
   showInfoToast,
@@ -37,6 +38,8 @@ type AuthContextValue = {
   isReady: boolean;
   isBusy: boolean;
   signIn: (credentials: SignInCredentials) => Promise<boolean>;
+  /** Resolves to the new session, or null when sign-in failed. */
+  signInWithPhone: (phoneE164: string) => Promise<Session | null>;
   signUp: (credentials: SignUpCredentials) => Promise<boolean>;
   signOut: () => Promise<boolean>;
   sendPasswordReset: (email: string) => Promise<boolean>;
@@ -134,6 +137,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [showAuthError],
   );
 
+  const signInWithPhone = useCallback(
+    async (phoneE164: string) => {
+      setIsBusy(true);
+
+      try {
+        const { data, error } = await signInWithPhoneRequest(phoneE164);
+
+        if (error) {
+          showAuthError(error);
+          return null;
+        }
+
+        showSuccessToast(tRef.current("authSignInSuccess"));
+        return data;
+      } catch (error) {
+        showAuthError(error instanceof Error ? error : null);
+        return null;
+      } finally {
+        setIsBusy(false);
+      }
+    },
+    [showAuthError],
+  );
+
   const signUp = useCallback(
     async (credentials: SignUpCredentials) => {
       setIsBusy(true);
@@ -222,6 +249,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       isReady,
       isBusy,
       signIn,
+      signInWithPhone,
       signUp,
       signOut,
       sendPasswordReset,
@@ -232,6 +260,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       sendPasswordReset,
       session,
       signIn,
+      signInWithPhone,
       signOut,
       signUp,
       user,

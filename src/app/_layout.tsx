@@ -30,6 +30,8 @@ import {
   OnboardingProvider,
   useOnboarding,
 } from "@/providers/onboarding-provider";
+import { PhoneAuthProvider } from "@/providers/phone-auth-provider";
+import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -62,9 +64,13 @@ export default function RootLayout() {
       <ThemeProvider>
         <LanguageProvider>
           <AuthProvider>
-            <OnboardingProvider>
-              <ThemedRootLayout />
-            </OnboardingProvider>
+            <ProfileProvider>
+              <PhoneAuthProvider>
+                <OnboardingProvider>
+                  <ThemedRootLayout />
+                </OnboardingProvider>
+              </PhoneAuthProvider>
+            </ProfileProvider>
           </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>
@@ -89,7 +95,11 @@ function ThemedRootLayout() {
     isComplete: isOnboardingComplete,
     isReady: isOnboardingReady,
   } = useOnboarding();
-  const { isReady: isAuthReady } = useAuth();
+  const { isAuthenticated, isReady: isAuthReady } = useAuth();
+  const {
+    isComplete: isProfileComplete,
+    isReady: isProfileReady,
+  } = useProfile();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -103,7 +113,17 @@ function ThemedRootLayout() {
     !isThemeReady ||
     !isLanguageReady ||
     !isOnboardingReady ||
-    !isAuthReady;
+    !isAuthReady ||
+    !isProfileReady;
+
+  // Four stages, each unlocked by the previous one: intro onboarding, phone
+  // login, farm profile setup, then the app itself.
+  const showIntroOnboarding = !isOnboardingComplete;
+  const showLogin = isOnboardingComplete && !isAuthenticated;
+  const showProfileSetup =
+    isOnboardingComplete && isAuthenticated && !isProfileComplete;
+  const showHome =
+    isOnboardingComplete && isAuthenticated && isProfileComplete;
 
   const baseTheme = effectiveTheme === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme: Theme = {
@@ -134,10 +154,16 @@ function ThemedRootLayout() {
               headerTitleStyle: { fontFamily: fonts.label },
             }}
           >
-            <Stack.Protected guard={!isOnboardingComplete}>
+            <Stack.Protected guard={showIntroOnboarding}>
               <Stack.Screen name="(onboarding)" />
             </Stack.Protected>
-            <Stack.Protected guard={isOnboardingComplete}>
+            <Stack.Protected guard={showLogin}>
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
+            <Stack.Protected guard={showProfileSetup}>
+              <Stack.Screen name="(profile-setup)" />
+            </Stack.Protected>
+            <Stack.Protected guard={showHome}>
               <Stack.Screen name="index" />
             </Stack.Protected>
           </Stack>
