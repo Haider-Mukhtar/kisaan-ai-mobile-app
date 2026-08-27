@@ -97,6 +97,7 @@ function ThemedRootLayout() {
     direction,
     fonts,
     isReady: isLanguageReady,
+    t,
   } = useLanguage();
   const {
     isComplete: isOnboardingComplete,
@@ -173,7 +174,16 @@ function ThemedRootLayout() {
               <Stack.Screen name="(profile-setup)" />
             </Stack.Protected>
             <Stack.Protected guard={showHome}>
-              <Stack.Screen name="index" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen
+                name="edit-profile"
+                options={{
+                  animation: "slide_from_bottom",
+                  headerShown: true,
+                  presentation: "modal",
+                  title: t("editProfileTitle"),
+                }}
+              />
               <Stack.Screen
                 name="change-location"
                 options={{ animation: "slide_from_bottom", presentation: "modal" }}
