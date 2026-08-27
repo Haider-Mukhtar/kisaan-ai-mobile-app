@@ -62,6 +62,10 @@ export function PhoneAuthProvider({ children }: PropsWithChildren) {
 
   const requestOtp = useCallback(
     (rawPhone: string) => {
+      if (!ensureOnline()) {
+        return false;
+      }
+
       const phoneE164 = normalizePakistaniMobile(rawPhone);
 
       if (!phoneE164) {
@@ -73,11 +77,15 @@ export function PhoneAuthProvider({ children }: PropsWithChildren) {
       deliverOtp(phoneE164);
       return true;
     },
-    [deliverOtp, t],
+    [deliverOtp, ensureOnline, t],
   );
 
   const resendOtp = useCallback(() => {
     if (!pendingPhone) {
+      return false;
+    }
+
+    if (!ensureOnline()) {
       return false;
     }
 
@@ -88,7 +96,7 @@ export function PhoneAuthProvider({ children }: PropsWithChildren) {
 
     deliverOtp(pendingPhone);
     return true;
-  }, [canResendAt, deliverOtp, pendingPhone, t]);
+  }, [canResendAt, deliverOtp, ensureOnline, pendingPhone, t]);
 
   const verifyOtp = useCallback(
     async (code: string) => {

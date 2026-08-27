@@ -96,15 +96,25 @@ export default function ChangeLocationScreen() {
       {current ? (
         <View
           style={[
-            styles.currentChip,
-            { backgroundColor: colors.muted, borderColor: colors.border },
+            styles.currentCard,
+            { backgroundColor: colors.card, borderColor: colors.border },
           ]}
         >
-          <AppText style={[styles.currentText, { color: colors.mutedForeground }]}>
-            {t("locationCurrent", {
-              district: getDistrictName(current, language),
-            })}
-          </AppText>
+          <AppText style={styles.currentIcon}>📌</AppText>
+          <View style={styles.currentCopy}>
+            <AppText
+              variant="label"
+              style={[styles.currentLabel, { color: colors.mutedForeground }]}
+            >
+              {t("locationCurrentLabel")}
+            </AppText>
+            <AppText
+              variant="label"
+              style={[styles.currentValue, { color: colors.foreground }]}
+            >
+              {getDistrictName(current, language)}
+            </AppText>
+          </View>
         </View>
       ) : null}
 
@@ -118,6 +128,13 @@ export default function ChangeLocationScreen() {
           onPress={() => void handleDetect()}
         />
       </View>
+
+      <AppText
+        variant="label"
+        style={[styles.sectionLabel, { color: colors.mutedForeground }]}
+      >
+        {t("locationChooseAnother")}
+      </AppText>
 
       <DistrictPicker onSelect={setSelected} selectedId={selected?.id ?? null} />
     </AuthShell>
@@ -134,20 +151,37 @@ const styles = StyleSheet.create({
     lineHeight: 27,
     marginTop: 4,
   },
-  currentChip: {
-    alignSelf: "flex-start",
-    borderRadius: 14,
+  currentCard: {
+    alignItems: "center",
+    borderRadius: 18,
     borderWidth: 1,
+    flexDirection: "row",
     marginTop: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    padding: 16,
   },
-  currentText: {
+  currentIcon: {
+    fontSize: 26,
+    lineHeight: 36,
+  },
+  currentCopy: {
+    flex: 1,
+    marginStart: 14,
+  },
+  currentLabel: {
     fontSize: 13,
     lineHeight: 22,
   },
+  currentValue: {
+    fontSize: 17,
+    lineHeight: 28,
+  },
   detect: {
     marginTop: 20,
+  },
+  sectionLabel: {
+    fontSize: 13,
+    lineHeight: 22,
     marginBottom: 8,
+    marginTop: 22,
   },
 });

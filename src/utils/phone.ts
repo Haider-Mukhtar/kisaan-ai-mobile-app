@@ -83,8 +83,9 @@ export function formatPakistaniMobile(value: string): string {
 }
 
 /**
- * Keeps the on-screen value tidy while the farmer types: digits only, capped
- * at the national number length, grouped as `0300 1234567`.
+ * Keeps the on-screen value tidy while the farmer types next to the fixed +92
+ * prefix: digits only, capped at the national number length, and grouped as
+ * `300 1234567`.
  */
 export function formatPhoneInput(value: string): string {
   const nationalNumber = toNationalNumber(value).slice(
@@ -97,8 +98,8 @@ export function formatPhoneInput(value: string): string {
   }
 
   if (nationalNumber.length <= 3) {
-    return `0${nationalNumber}`;
+    return nationalNumber;
   }
 
-  return `0${nationalNumber.slice(0, 3)} ${nationalNumber.slice(3)}`;
+  return `${nationalNumber.slice(0, 3)} ${nationalNumber.slice(3)}`;
 }

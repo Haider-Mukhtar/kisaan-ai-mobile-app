@@ -14,14 +14,25 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
+const serverStorageValues = new Map<string, string>();
+const serverStorage: Pick<Storage, "getItem" | "setItem" | "removeItem"> = {
+  getItem: (key) => serverStorageValues.get(key) ?? null,
+  setItem: (key, value) => serverStorageValues.set(key, value),
+  removeItem: (key) => serverStorageValues.delete(key),
+};
+const hasPersistentStorage = typeof globalThis.localStorage !== "undefined";
+const authStorage = hasPersistentStorage
+  ? globalThis.localStorage
+  : serverStorage;
+
 export const supabase = createClient<Database>(
   supabaseUrl,
   supabasePublishableKey,
   {
     auth: {
-      storage: localStorage,
+      storage: authStorage,
       autoRefreshToken: true,
-      persistSession: true,
+      persistSession: hasPersistentStorage,
       detectSessionInUrl: false,
     },
   },

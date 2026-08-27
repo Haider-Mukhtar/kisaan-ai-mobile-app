@@ -21,6 +21,7 @@ export type FarmerProfile = {
   phone: string;
   fullName: string | null;
   village: string | null;
+  city: string | null;
   farmSizeAcres: number | null;
   crops: string[];
   /** Null until the farmer finishes the location step. */
@@ -32,6 +33,7 @@ export type FarmerProfile = {
 export type FarmProfileDraft = {
   fullName: string;
   village: string;
+  city: string;
   farmSizeAcres: number | null;
   crops: string[];
 };
@@ -68,6 +70,7 @@ function toFarmerProfile(row: ProfileRow): FarmerProfile {
     phone: row.phone,
     fullName: row.full_name,
     village: row.village,
+    city: row.city,
     farmSizeAcres: row.farm_size_acres,
     crops: row.crops ?? [],
     location: toFarmLocation(row),
@@ -163,6 +166,7 @@ export async function saveFarmProfile(
   return patchProfile(userId, {
     full_name: draft.fullName.trim() || null,
     village: draft.village.trim() || null,
+    city: draft.city.trim() || null,
     farm_size_acres: draft.farmSizeAcres,
     crops: draft.crops,
   });

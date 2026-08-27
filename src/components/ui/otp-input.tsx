@@ -7,6 +7,7 @@ import useThemeManager from "@/hooks/use-theme-manager";
 import { OTP_LENGTH, sanitizeOtpInput } from "@/utils/otp";
 
 type OtpInputProps = {
+  accessibilityLabel: string;
   value: string;
   onChange: (value: string) => void;
   onComplete?: (value: string) => void;
@@ -21,6 +22,7 @@ type OtpInputProps = {
  * instead of juggling focus across six separate fields.
  */
 export function OtpInput({
+  accessibilityLabel,
   value,
   onChange,
   onComplete,
@@ -43,8 +45,7 @@ export function OtpInput({
 
   return (
     <Pressable
-      accessibilityLabel="One time password"
-      accessibilityRole="none"
+      accessible={false}
       onPress={() => inputRef.current?.focus()}
       style={styles.container}
     >
@@ -86,6 +87,7 @@ export function OtpInput({
 
       <TextInput
         ref={inputRef}
+        accessibilityLabel={accessibilityLabel}
         autoComplete="sms-otp"
         autoFocus={autoFocus}
         caretHidden

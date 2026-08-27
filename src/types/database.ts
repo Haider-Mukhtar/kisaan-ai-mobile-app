@@ -16,6 +16,7 @@ export type ProfileRow = {
   phone: string;
   full_name: string | null;
   village: string | null;
+  city: string | null;
   farm_size_acres: number | null;
   crops: string[];
   district: string | null;
@@ -33,6 +34,7 @@ export type ProfileInsert = {
   phone: string;
   full_name?: string | null;
   village?: string | null;
+  city?: string | null;
   farm_size_acres?: number | null;
   crops?: string[];
   district?: string | null;

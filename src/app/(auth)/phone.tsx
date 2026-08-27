@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Keyboard, StyleSheet, View } from "react-native";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { OnboardingButton } from "@/components/onboarding/onboarding-button";
@@ -23,7 +23,7 @@ export default function PhoneScreen() {
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const digitCount = phone.replace(/\D/g, "").length;
-  const isComplete = digitCount >= PHONE_NATIONAL_NUMBER_LENGTH;
+  const isComplete = digitCount === PHONE_NATIONAL_NUMBER_LENGTH;
   const isValid = isValidPakistaniMobile(phone);
   const showError = hasSubmitted && !isValid;
 
@@ -35,6 +35,7 @@ export default function PhoneScreen() {
     }
 
     if (requestOtp(phone)) {
+      Keyboard.dismiss();
       router.push("/(auth)/verify");
     }
   };
@@ -71,10 +72,10 @@ export default function PhoneScreen() {
             hint={showError ? t("phoneInvalidHint") : t("phoneHint")}
             keyboardType="phone-pad"
             label={t("phoneLabel")}
-            maxLength={12}
+            maxLength={16}
             onChangeText={(value) => setPhone(formatPhoneInput(value))}
             onSubmitEditing={handleContinue}
-            placeholder="0300 1234567"
+            placeholder="300 1234567"
             prefix="+92"
             returnKeyType="done"
             textContentType="telephoneNumber"

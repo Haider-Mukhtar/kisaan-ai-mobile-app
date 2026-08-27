@@ -2,10 +2,10 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
-import { AuthShell } from "@/components/auth/auth-shell";
 import { DistrictPicker } from "@/components/location/district-picker";
 import { LocationNotice } from "@/components/location/location-notice";
 import { OnboardingButton } from "@/components/onboarding/onboarding-button";
+import { ProfileSetupShell } from "@/components/profile-setup/profile-setup-shell";
 import { AppText } from "@/components/ui/app-text";
 import { SecondaryButton } from "@/components/ui/secondary-button";
 import {
@@ -92,8 +92,12 @@ export default function LocationScreen() {
   };
 
   return (
-    <AuthShell
+    <ProfileSetupShell
+      description={t("locationDescription")}
+      icon="📍"
       onBack={handleBack}
+      step={6}
+      title={t("locationTitle")}
       footer={
         <View style={styles.footer}>
           {isPicking ? (
@@ -138,13 +142,6 @@ export default function LocationScreen() {
         </View>
       }
     >
-      <AppText variant="title" style={[styles.title, { color: colors.foreground }]}>
-        {t("locationTitle")}
-      </AppText>
-      <AppText style={[styles.description, { color: colors.mutedForeground }]}>
-        {t("locationDescription")}
-      </AppText>
-
       {notice ? <LocationNotice notice={notice} /> : null}
 
       {isPicking ? (
@@ -196,20 +193,11 @@ export default function LocationScreen() {
           </AppText>
         </View>
       )}
-    </AuthShell>
+    </ProfileSetupShell>
   );
 }
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 28,
-    lineHeight: 46,
-  },
-  description: {
-    fontSize: 15,
-    lineHeight: 27,
-    marginTop: 4,
-  },
   hero: {
     alignItems: "center",
     borderRadius: 22,

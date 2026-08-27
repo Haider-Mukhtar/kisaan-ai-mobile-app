@@ -1,6 +1,6 @@
 import { Redirect, router } from "expo-router";
-import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Keyboard, Pressable, StyleSheet, View } from "react-native";
 
 import { AuthShell } from "@/components/auth/auth-shell";
 import { OnboardingButton } from "@/components/onboarding/onboarding-button";
@@ -20,6 +20,7 @@ export default function VerifyScreen() {
   const [code, setCode] = useState("");
   const [hasError, setHasError] = useState(false);
   const [secondsUntilResend, setSecondsUntilResend] = useState(0);
+  const submitInFlightRef = useRef(false);
 
   useEffect(() => {
     const tick = () => {
@@ -40,20 +41,38 @@ export default function VerifyScreen() {
   }
 
   const handleSubmit = async (submitted: string) => {
-    if (submitted.length !== OTP_LENGTH || isVerifying) {
+    if (
+      submitted.length !== OTP_LENGTH ||
+      isVerifying ||
+      submitInFlightRef.current
+    ) {
       return;
     }
 
-    const verified = await verifyOtp(submitted);
+    submitInFlightRef.current = true;
+    Keyboard.dismiss();
 
-    if (!verified) {
-      setHasError(true);
+    try {
+      const verified = await verifyOtp(submitted);
+
+      if (!verified) {
+        setHasError(true);
+        setCode("");
+        return;
+      }
+
+      // On success the root layout guard swaps this group for profile setup.
+      setHasError(false);
+    } finally {
+      submitInFlightRef.current = false;
+    }
+  };
+
+  const handleResend = () => {
+    if (resendOtp()) {
       setCode("");
-      return;
+      setHasError(false);
     }
-
-    // On success the root layout guard swaps this group for profile setup.
-    setHasError(false);
   };
 
   const handleChangeNumber = () => {
@@ -87,6 +106,7 @@ export default function VerifyScreen() {
 
         <View style={styles.otp}>
           <OtpInput
+            accessibilityLabel={t("otpInputAccessibilityLabel")}
             autoFocus
             editable={!isVerifying}
             hasError={hasError}
@@ -97,6 +117,14 @@ export default function VerifyScreen() {
             onComplete={(value) => void handleSubmit(value)}
             value={code}
           />
+          {hasError ? (
+            <AppText
+              accessibilityRole="alert"
+              style={[styles.errorText, { color: colors.red }]}
+            >
+              {t("otpInvalidCodeHint")}
+            </AppText>
+          ) : null}
         </View>
 
         <View style={styles.actions}>
@@ -104,7 +132,7 @@ export default function VerifyScreen() {
             accessibilityRole="button"
             disabled={secondsUntilResend > 0 || isVerifying}
             hitSlop={8}
-            onPress={() => resendOtp()}
+            onPress={handleResend}
           >
             <AppText
               variant="label"
@@ -159,6 +187,12 @@ const styles = StyleSheet.create({
   },
   otp: {
     marginTop: 32,
+  },
+  errorText: {
+    fontSize: 13,
+    lineHeight: 22,
+    marginTop: 10,
+    textAlign: "center",
   },
   actions: {
     alignItems: "center",

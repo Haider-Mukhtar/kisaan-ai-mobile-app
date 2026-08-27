@@ -9,17 +9,32 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AppText } from "@/components/ui/app-text";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 
-type AuthShellProps = PropsWithChildren<{
+export type ProfileSetupStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+type ProfileSetupShellProps = PropsWithChildren<{
+  step: ProfileSetupStep;
+  icon: string;
+  title: string;
+  description: string;
   footer: ReactNode;
   onBack?: () => void;
 }>;
 
-export function AuthShell({ footer, onBack, children }: AuthShellProps) {
+export function ProfileSetupShell({
+  step,
+  icon,
+  title,
+  description,
+  footer,
+  onBack,
+  children,
+}: ProfileSetupShellProps) {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
   const { isOffline } = useNetwork();
@@ -64,7 +79,25 @@ export function AuthShell({ footer, onBack, children }: AuthShellProps) {
           </Text>
         </View>
 
-        <View style={styles.sideSlot} />
+        <View style={styles.sideSlot}>
+          <View style={[styles.stepBadge, { backgroundColor: colors.muted }]}>
+            <Text style={[styles.stepLabel, { color: colors.mutedForeground }]}>
+              {step} / 6
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.progressRow}>
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <View
+            key={item}
+            style={[
+              styles.progressTrack,
+              { backgroundColor: item <= step ? colors.primary : colors.muted },
+            ]}
+          />
+        ))}
       </View>
 
       <KeyboardAvoidingView
@@ -77,7 +110,25 @@ export function AuthShell({ footer, onBack, children }: AuthShellProps) {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {children}
+          <View style={[styles.iconCircle, { backgroundColor: colors.accent }]}>
+            <Text style={styles.icon}>{icon}</Text>
+          </View>
+
+          <View style={styles.copyBlock}>
+            <AppText
+              variant="title"
+              style={[styles.title, { color: colors.foreground }]}
+            >
+              {title}
+            </AppText>
+            <AppText
+              style={[styles.description, { color: colors.mutedForeground }]}
+            >
+              {description}
+            </AppText>
+          </View>
+
+          <View style={styles.control}>{children}</View>
         </ScrollView>
 
         <View style={[styles.footer, { borderTopColor: colors.border }]}>
@@ -134,7 +185,6 @@ const styles = StyleSheet.create({
   brandLockup: {
     alignItems: "center",
     flex: 1,
-    justifyContent: "center",
   },
   brandEnglish: {
     fontFamily: Fonts.interSemiBold,
@@ -146,10 +196,64 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 23,
   },
+  stepBadge: {
+    alignItems: "center",
+    borderRadius: 14,
+    height: 28,
+    justifyContent: "center",
+    minWidth: 50,
+    paddingHorizontal: 8,
+  },
+  stepLabel: {
+    fontFamily: Fonts.interSemiBold,
+    fontSize: 11,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 16,
+  },
+  progressRow: {
+    direction: "ltr",
+    flexDirection: "row",
+    gap: 7,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+  },
+  progressTrack: {
+    borderRadius: 3,
+    flex: 1,
+    height: 5,
+  },
   content: {
     flexGrow: 1,
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 24,
+  },
+  iconCircle: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderRadius: 28,
+    height: 56,
+    justifyContent: "center",
+    width: 56,
+  },
+  icon: {
+    fontSize: 27,
+    lineHeight: 38,
+  },
+  copyBlock: {
+    paddingTop: 18,
+  },
+  title: {
+    fontSize: 30,
+    lineHeight: 46,
+  },
+  description: {
+    fontSize: 15,
+    lineHeight: 26,
+    paddingTop: 4,
+  },
+  control: {
+    paddingTop: 28,
   },
   footer: {
     borderTopWidth: StyleSheet.hairlineWidth,
