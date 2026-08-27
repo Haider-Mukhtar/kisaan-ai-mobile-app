@@ -14,7 +14,9 @@ import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import {
   loadOrSeedProfile,
+  saveFarmLocation,
   saveFarmProfile,
+  type FarmLocation,
   type FarmProfileDraft,
   type FarmerProfile,
 } from "@/services/supabase/profiles";
@@ -29,6 +31,11 @@ type ProfileContextValue = {
   /** True once post-login onboarding has been completed. */
   isComplete: boolean;
   saveProfile: (draft: FarmProfileDraft) => Promise<boolean>;
+  /**
+   * Stores the farm's coordinates. This is the last step of post-login
+   * onboarding, so the first successful call also completes the profile.
+   */
+  saveLocation: (location: FarmLocation) => Promise<boolean>;
 };
 
 /**
@@ -128,6 +135,41 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     [ensureOnline, userId],
   );
 
+  const saveLocation = useCallback(
+    async (location: FarmLocation) => {
+      if (!userId || !ensureOnline()) {
+        return false;
+      }
+
+      const wasComplete = Boolean(
+        loaded?.userId === userId && loaded.profile?.isComplete,
+      );
+
+      setIsSaving(true);
+
+      try {
+        const { data, error } = await saveFarmLocation(userId, location, {
+          completeSetup: !wasComplete,
+        });
+
+        if (error) {
+          showErrorToast(tRef.current("locationSaveErrorTitle"), error.message);
+          return false;
+        }
+
+        setLoaded({ userId, profile: data });
+        showSuccessToast(tRef.current("locationSaveSuccessTitle"));
+        return true;
+      } catch {
+        showErrorToast(tRef.current("locationSaveErrorTitle"));
+        return false;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [ensureOnline, loaded, userId],
+  );
+
   const value = useMemo(() => {
     const isCurrent = userId !== null && loaded?.userId === userId;
     const profile = isCurrent ? loaded.profile : null;
@@ -139,8 +181,17 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       isSaving,
       isComplete: Boolean(isAuthenticated && profile?.isComplete),
       saveProfile,
+      saveLocation,
     };
-  }, [isAuthReady, isAuthenticated, isSaving, loaded, saveProfile, userId]);
+  }, [
+    isAuthReady,
+    isAuthenticated,
+    isSaving,
+    loaded,
+    saveLocation,
+    saveProfile,
+    userId,
+  ]);
 
   return (
     <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>

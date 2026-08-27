@@ -35,6 +35,7 @@ import {
 import { PhoneAuthProvider } from "@/providers/phone-auth-provider";
 import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { WeatherProvider } from "@/providers/weather-provider";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -70,7 +71,9 @@ export default function RootLayout() {
               <ProfileProvider>
                 <PhoneAuthProvider>
                   <OnboardingProvider>
-                    <ThemedRootLayout />
+                    <WeatherProvider>
+                      <ThemedRootLayout />
+                    </WeatherProvider>
                   </OnboardingProvider>
                 </PhoneAuthProvider>
               </ProfileProvider>
@@ -171,6 +174,10 @@ function ThemedRootLayout() {
             </Stack.Protected>
             <Stack.Protected guard={showHome}>
               <Stack.Screen name="index" />
+              <Stack.Screen
+                name="change-location"
+                options={{ animation: "slide_from_bottom", presentation: "modal" }}
+              />
             </Stack.Protected>
           </Stack>
         )}

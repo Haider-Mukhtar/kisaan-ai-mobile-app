@@ -47,7 +47,14 @@
           "supportsRTL": true
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Kisaan AI uses your location to show the weather and farming advice for your area.",
+          "locationAlwaysAndWhenInUsePermission": "Kisaan AI uses your location to show the weather and farming advice for your area."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

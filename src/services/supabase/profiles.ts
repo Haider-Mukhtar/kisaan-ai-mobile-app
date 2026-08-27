@@ -3,6 +3,19 @@ import type { PostgrestError } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import type { ProfileRow, ProfileUpdate } from "@/types/database";
 
+/** How the farmer's coordinates were obtained. */
+export type LocationSource = "gps" | "manual" | "default";
+
+const LOCATION_SOURCES: LocationSource[] = ["gps", "manual", "default"];
+
+export type FarmLocation = {
+  /** District id from `@/constants/districts`. */
+  districtId: string;
+  latitude: number;
+  longitude: number;
+  source: LocationSource;
+};
+
 export type FarmerProfile = {
   id: string;
   phone: string;
@@ -10,6 +23,9 @@ export type FarmerProfile = {
   village: string | null;
   farmSizeAcres: number | null;
   crops: string[];
+  /** Null until the farmer finishes the location step. */
+  location: FarmLocation | null;
+  locationUpdatedAt: string | null;
   isComplete: boolean;
 };
 
@@ -24,6 +40,28 @@ export type ProfileResult<T> =
   | { data: T; error: null }
   | { data: null; error: PostgrestError };
 
+function toLocationSource(value: string | null): LocationSource {
+  return LOCATION_SOURCES.find((source) => source === value) ?? "manual";
+}
+
+function toFarmLocation(row: ProfileRow): FarmLocation | null {
+  const latitude = Number(row.latitude ?? NaN);
+  const longitude = Number(row.longitude ?? NaN);
+
+  // Coordinates arrive as Postgres numerics and are absent on profiles created
+  // before the location step existed, so both are checked before use.
+  if (!row.district || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    return null;
+  }
+
+  return {
+    districtId: row.district,
+    latitude,
+    longitude,
+    source: toLocationSource(row.location_source),
+  };
+}
+
 function toFarmerProfile(row: ProfileRow): FarmerProfile {
   return {
     id: row.id,
@@ -32,6 +70,8 @@ function toFarmerProfile(row: ProfileRow): FarmerProfile {
     village: row.village,
     farmSizeAcres: row.farm_size_acres,
     crops: row.crops ?? [],
+    location: toFarmLocation(row),
+    locationUpdatedAt: row.location_updated_at,
     isComplete: row.profile_completed_at !== null,
   };
 }
@@ -93,18 +133,10 @@ export async function loadOrSeedProfile(
   return ensureProfile(userId, fallbackPhone);
 }
 
-export async function saveFarmProfile(
+async function patchProfile(
   userId: string,
-  draft: FarmProfileDraft,
+  patch: ProfileUpdate,
 ): Promise<ProfileResult<FarmerProfile>> {
-  const patch: ProfileUpdate = {
-    full_name: draft.fullName.trim() || null,
-    village: draft.village.trim() || null,
-    farm_size_acres: draft.farmSizeAcres,
-    crops: draft.crops,
-    profile_completed_at: new Date().toISOString(),
-  };
-
   const { data, error } = await supabase
     .from("profiles")
     .update(patch)
@@ -117,4 +149,39 @@ export async function saveFarmProfile(
   }
 
   return { data: toFarmerProfile(data), error: null };
+}
+
+/**
+ * Saves the farm details step. Setup is not finished here — the location step
+ * that follows is what marks the profile complete — so a farmer who closes the
+ * app midway comes back to a prefilled form instead of losing their answers.
+ */
+export async function saveFarmProfile(
+  userId: string,
+  draft: FarmProfileDraft,
+): Promise<ProfileResult<FarmerProfile>> {
+  return patchProfile(userId, {
+    full_name: draft.fullName.trim() || null,
+    village: draft.village.trim() || null,
+    farm_size_acres: draft.farmSizeAcres,
+    crops: draft.crops,
+  });
+}
+
+export async function saveFarmLocation(
+  userId: string,
+  location: FarmLocation,
+  { completeSetup }: { completeSetup: boolean },
+): Promise<ProfileResult<FarmerProfile>> {
+  const now = new Date().toISOString();
+
+  return patchProfile(userId, {
+    district: location.districtId,
+    latitude: location.latitude,
+    longitude: location.longitude,
+    location_source: location.source,
+    location_updated_at: now,
+    // Only stamped the first time, so it keeps meaning "when setup finished".
+    ...(completeSetup ? { profile_completed_at: now } : {}),
+  });
 }

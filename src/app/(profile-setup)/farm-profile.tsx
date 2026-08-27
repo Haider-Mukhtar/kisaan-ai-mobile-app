@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 
@@ -50,13 +51,19 @@ export default function FarmProfileScreen() {
       return;
     }
 
-    // On success the root layout guard swaps this group for the home screen.
-    await saveProfile({
+    const saved = await saveProfile({
       fullName,
       village,
       farmSizeAcres: parseFarmSize(farmSize),
       crops,
     });
+
+    // Setup finishes on the location step, which is what unlocks the home
+    // screen. Details are already stored, so a farmer who drops off here comes
+    // back to a prefilled form.
+    if (saved) {
+      router.push("/(profile-setup)/location");
+    }
   };
 
   return (
@@ -64,7 +71,7 @@ export default function FarmProfileScreen() {
       footer={
         <OnboardingButton
           disabled={!canSubmit}
-          label={isSaving ? t("farmProfileSaving") : t("farmProfileSave")}
+          label={isSaving ? t("farmProfileSaving") : t("continue")}
           onPress={() => void handleSave()}
         />
       }
