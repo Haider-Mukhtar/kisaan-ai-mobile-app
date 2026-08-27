@@ -10,13 +10,13 @@ import {
   type LanguageCode,
 } from "@/providers/language-provider";
 
-const options: Array<{
+const options: {
   code: LanguageCode;
   name: string;
   sample: string;
   fontFamily: string;
   direction: "ltr" | "rtl";
-}> = [
+}[] = [
   {
     code: "en",
     name: "English",

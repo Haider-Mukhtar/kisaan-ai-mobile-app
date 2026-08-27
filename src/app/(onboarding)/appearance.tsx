@@ -14,11 +14,11 @@ import {
 import { useOnboarding } from "@/providers/onboarding-provider";
 import type { ThemePreference } from "@/providers/theme-provider";
 
-const options: Array<{
+const options: {
   value: ThemePreference;
   titleKey: TranslationKey;
   descriptionKey: TranslationKey;
-}> = [
+}[] = [
   {
     value: "system",
     titleKey: "themeSystem",

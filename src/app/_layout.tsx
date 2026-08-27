@@ -15,6 +15,7 @@ import { Inter_400Regular, Inter_600SemiBold } from "@expo-google-fonts/inter";
 import { NotoNaskhArabic_400Regular } from "@expo-google-fonts/noto-naskh-arabic";
 import { NotoNastaliqUrdu_400Regular } from "@expo-google-fonts/noto-nastaliq-urdu";
 import { NotoSansArabic_600SemiBold } from "@expo-google-fonts/noto-sans-arabic";
+import Toast from "react-native-toast-message";
 
 import AppSplashScreen from "@/components/splash-screen";
 import { Fonts } from "@/constants/theme";
@@ -28,6 +29,7 @@ import {
   useOnboarding,
 } from "@/providers/onboarding-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
+import toastConfig from "@/components/toast-config";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -63,6 +65,7 @@ export default function RootLayout() {
           </OnboardingProvider>
         </LanguageProvider>
       </ThemeProvider>
+      <Toast config={toastConfig} />
     </SafeAreaProvider>
   );
 }
