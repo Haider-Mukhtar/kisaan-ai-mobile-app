@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/ui/app-text";
 import useThemeManager from "@/hooks/use-theme-manager";
+import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useOnboarding } from "@/providers/onboarding-provider";
 
@@ -10,6 +11,7 @@ export default function Index() {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
   const { resetOnboarding } = useOnboarding();
+  const { isAuthenticated, isBusy, signOut, user } = useAuth();
   const [isResetting, setIsResetting] = useState(false);
 
   const handleResetOnboarding = async () => {
@@ -19,6 +21,14 @@ export default function Index() {
 
     setIsResetting(true);
     await resetOnboarding();
+  };
+
+  const handleSignOut = async () => {
+    if (isBusy) {
+      return;
+    }
+
+    await signOut();
   };
 
   return (
@@ -45,11 +55,44 @@ export default function Index() {
           { backgroundColor: colors.card, borderColor: colors.border },
         ]}
       >
-        <View style={[styles.readyDot, { backgroundColor: colors.success }]} />
+        <View
+          style={[
+            styles.readyDot,
+            {
+              backgroundColor: isAuthenticated ? colors.success : colors.muted,
+            },
+          ]}
+        />
         <AppText style={[styles.readyText, { color: colors.cardForeground }]}>
-          {t("welcomeSubtitle")}
+          {isAuthenticated && user?.email
+            ? t("authSignedInAs", { email: user.email })
+            : t("authSignedOutStatus")}
         </AppText>
       </View>
+
+      {isAuthenticated ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isBusy}
+          onPress={() => void handleSignOut()}
+          style={({ pressed }) => [
+            styles.resetButton,
+            {
+              backgroundColor: colors.card,
+              borderColor: colors.border,
+            },
+            pressed && styles.resetButtonPressed,
+            isBusy && styles.resetButtonDisabled,
+          ]}
+        >
+          <AppText
+            variant="label"
+            style={[styles.resetButtonText, { color: colors.foreground }]}
+          >
+            {isBusy ? t("authSigningOut") : t("authSignOut")}
+          </AppText>
+        </Pressable>
+      ) : null}
 
       <Pressable
         accessibilityRole="button"

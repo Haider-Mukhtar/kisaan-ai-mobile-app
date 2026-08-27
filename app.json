@@ -35,12 +35,19 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "ur"],
-            "android": ["en", "ur"]
+            "ios": [
+              "en",
+              "ur"
+            ],
+            "android": [
+              "en",
+              "ur"
+            ]
           },
           "supportsRTL": true
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

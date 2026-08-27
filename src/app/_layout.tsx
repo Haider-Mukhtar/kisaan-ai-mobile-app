@@ -20,6 +20,8 @@ import Toast from "react-native-toast-message";
 import AppSplashScreen from "@/components/splash-screen";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
+import toastConfig from "@/components/toast-config";
+import { AuthProvider, useAuth } from "@/providers/auth-provider";
 import {
   LanguageProvider,
   useLanguage,
@@ -29,7 +31,6 @@ import {
   useOnboarding,
 } from "@/providers/onboarding-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
-import toastConfig from "@/components/toast-config";
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -60,9 +61,11 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <LanguageProvider>
-          <OnboardingProvider>
-            <ThemedRootLayout />
-          </OnboardingProvider>
+          <AuthProvider>
+            <OnboardingProvider>
+              <ThemedRootLayout />
+            </OnboardingProvider>
+          </AuthProvider>
         </LanguageProvider>
       </ThemeProvider>
       <Toast config={toastConfig} />
@@ -86,6 +89,7 @@ function ThemedRootLayout() {
     isComplete: isOnboardingComplete,
     isReady: isOnboardingReady,
   } = useOnboarding();
+  const { isReady: isAuthReady } = useAuth();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -98,7 +102,8 @@ function ThemedRootLayout() {
     !minSplashElapsed ||
     !isThemeReady ||
     !isLanguageReady ||
-    !isOnboardingReady;
+    !isOnboardingReady ||
+    !isAuthReady;
 
   const baseTheme = effectiveTheme === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme: Theme = {
