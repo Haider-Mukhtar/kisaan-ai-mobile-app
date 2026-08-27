@@ -11,6 +11,7 @@ import {
 
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
+import { useNetwork } from "@/providers/network-provider";
 import {
   loadOrSeedProfile,
   saveFarmProfile,
@@ -46,6 +47,7 @@ const ProfileContext = createContext<ProfileContextValue | undefined>(
 
 export function ProfileProvider({ children }: PropsWithChildren) {
   const { t } = useLanguage();
+  const { ensureOnline } = useNetwork();
   const { isAuthenticated, isReady: isAuthReady, user } = useAuth();
   const tRef = useRef(t);
   const [loaded, setLoaded] = useState<LoadedProfile | null>(null);
@@ -99,7 +101,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
   const saveProfile = useCallback(
     async (draft: FarmProfileDraft) => {
-      if (!userId) {
+      if (!userId || !ensureOnline()) {
         return false;
       }
 
@@ -123,7 +125,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         setIsSaving(false);
       }
     },
-    [userId],
+    [ensureOnline, userId],
   );
 
   const value = useMemo(() => {

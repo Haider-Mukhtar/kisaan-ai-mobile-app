@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
+import { useNetwork } from "@/providers/network-provider";
 
 export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
@@ -32,10 +33,11 @@ export function OnboardingShell({
 }: OnboardingShellProps) {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
+  const { isOffline } = useNetwork();
 
   return (
     <SafeAreaView
-      edges={["top", "bottom"]}
+      edges={isOffline ? ["bottom"] : ["top", "bottom"]}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <View

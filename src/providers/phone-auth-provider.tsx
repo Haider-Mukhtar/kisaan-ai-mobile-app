@@ -10,6 +10,7 @@ import {
 
 import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
+import { useNetwork } from "@/providers/network-provider";
 import { ensureProfile } from "@/services/supabase/profiles";
 import {
   createDummyOtp,
@@ -37,6 +38,7 @@ const PhoneAuthContext = createContext<PhoneAuthContextValue | undefined>(
 
 export function PhoneAuthProvider({ children }: PropsWithChildren) {
   const { t } = useLanguage();
+  const { ensureOnline } = useNetwork();
   const { signInWithPhone } = useAuth();
   const otpRef = useRef<DummyOtp | null>(null);
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
@@ -107,6 +109,10 @@ export function PhoneAuthProvider({ children }: PropsWithChildren) {
         return false;
       }
 
+      if (!ensureOnline()) {
+        return false;
+      }
+
       setIsVerifying(true);
 
       try {
@@ -132,7 +138,7 @@ export function PhoneAuthProvider({ children }: PropsWithChildren) {
         setIsVerifying(false);
       }
     },
-    [pendingPhone, signInWithPhone, t],
+    [ensureOnline, pendingPhone, signInWithPhone, t],
   );
 
   const reset = useCallback(() => {

@@ -17,15 +17,17 @@ import { NotoNastaliqUrdu_400Regular } from "@expo-google-fonts/noto-nastaliq-ur
 import { NotoSansArabic_600SemiBold } from "@expo-google-fonts/noto-sans-arabic";
 import Toast from "react-native-toast-message";
 
+import { NetworkBanner } from "@/components/network-banner";
 import AppSplashScreen from "@/components/splash-screen";
+import toastConfig from "@/components/toast-config";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
-import toastConfig from "@/components/toast-config";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
 import {
   LanguageProvider,
   useLanguage,
 } from "@/providers/language-provider";
+import { NetworkProvider, useNetwork } from "@/providers/network-provider";
 import {
   OnboardingProvider,
   useOnboarding,
@@ -63,18 +65,20 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <LanguageProvider>
-          <AuthProvider>
-            <ProfileProvider>
-              <PhoneAuthProvider>
-                <OnboardingProvider>
-                  <ThemedRootLayout />
-                </OnboardingProvider>
-              </PhoneAuthProvider>
-            </ProfileProvider>
-          </AuthProvider>
+          <NetworkProvider>
+            <AuthProvider>
+              <ProfileProvider>
+                <PhoneAuthProvider>
+                  <OnboardingProvider>
+                    <ThemedRootLayout />
+                  </OnboardingProvider>
+                </PhoneAuthProvider>
+              </ProfileProvider>
+            </AuthProvider>
+          </NetworkProvider>
         </LanguageProvider>
+        <Toast config={toastConfig} />
       </ThemeProvider>
-      <Toast config={toastConfig} />
     </SafeAreaProvider>
   );
 }
@@ -100,6 +104,7 @@ function ThemedRootLayout() {
     isComplete: isProfileComplete,
     isReady: isProfileReady,
   } = useProfile();
+  const { isOffline } = useNetwork();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
   useEffect(() => {
@@ -142,6 +147,7 @@ function ThemedRootLayout() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={[styles.app, { direction }]}>
+        {!showSplash && isOffline ? <NetworkBanner /> : null}
         {showSplash ? (
           <AppSplashScreen />
         ) : (
@@ -169,7 +175,7 @@ function ThemedRootLayout() {
           </Stack>
         )}
       </View>
-      <StatusBar style={showSplash || isDarkMode ? "light" : "dark"} />
+      <StatusBar style={showSplash || isDarkMode || isOffline ? "light" : "dark"} />
     </NavigationThemeProvider>
   );
 }

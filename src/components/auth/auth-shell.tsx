@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
+import { useNetwork } from "@/providers/network-provider";
 
 type AuthShellProps = PropsWithChildren<{
   footer: ReactNode;
@@ -22,10 +23,11 @@ type AuthShellProps = PropsWithChildren<{
 export function AuthShell({ footer, onBack, children }: AuthShellProps) {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
+  const { isOffline } = useNetwork();
 
   return (
     <SafeAreaView
-      edges={["top", "bottom"]}
+      edges={isOffline ? ["bottom"] : ["top", "bottom"]}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <View

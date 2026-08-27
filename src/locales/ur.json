@@ -89,5 +89,9 @@
   "cropWheat": "گندم",
   "profileLoadErrorTitle": "آپ کا پروفائل لوڈ نہیں ہو سکا",
   "profileSaveErrorTitle": "آپ کا پروفائل محفوظ نہیں ہو سکا",
-  "profileSaveSuccessTitle": "کھیت کی تفصیلات محفوظ ہو گئیں"
+  "profileSaveSuccessTitle": "کھیت کی تفصیلات محفوظ ہو گئیں",
+  "networkOfflineTitle": "انٹرنیٹ دستیاب نہیں",
+  "networkOfflineDescription": "اپنا کنکشن چیک کریں۔ آن لائن آنے تک کچھ سہولیات کام نہیں کریں گی۔",
+  "networkOnlineTitle": "انٹرنیٹ واپس آ گیا",
+  "networkOnlineDescription": "آپ کا کنکشن بحال ہو گیا ہے۔"
 }

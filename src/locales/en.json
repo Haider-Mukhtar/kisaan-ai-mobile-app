@@ -89,5 +89,9 @@
   "cropWheat": "Wheat",
   "profileLoadErrorTitle": "Could not load your profile",
   "profileSaveErrorTitle": "Could not save your profile",
-  "profileSaveSuccessTitle": "Farm details saved"
+  "profileSaveSuccessTitle": "Farm details saved",
+  "networkOfflineTitle": "No internet connection",
+  "networkOfflineDescription": "Check your connection. Some features will not work until you are back online.",
+  "networkOnlineTitle": "You are back online",
+  "networkOnlineDescription": "Your connection has been restored."
 }
