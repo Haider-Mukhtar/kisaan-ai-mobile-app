@@ -1,115 +1,195 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Ionicons } from "@react-native-vector-icons/ionicons";
+import { useCallback, useRef, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { AiChatBubble } from "@/components/ai/chat-bubble";
+import { AiChatComposer } from "@/components/ai/chat-composer";
+import { AiEmptyChat } from "@/components/ai/empty-chat";
+import { AiLiveStatus } from "@/components/ai/live-status";
 import { AppText } from "@/components/ui/app-text";
+import { useGeminiLiveChat } from "@/hooks/use-gemini-live-chat";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
-
-const FEATURES = [
-  { emoji: "💬", title: "aiAskTitle", body: "aiAskDescription" },
-  { emoji: "🌿", title: "aiCropTitle", body: "aiCropDescription" },
-  { emoji: "💧", title: "aiWaterTitle", body: "aiWaterDescription" },
-] as const;
+import type { GeminiChatMessage } from "@/services/gemini/types";
 
 export default function AiScreen() {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
   const { isOffline } = useNetwork();
+  const [draft, setDraft] = useState("");
+  const listRef = useRef<FlatList<GeminiChatMessage>>(null);
+  const {
+    chooseFromLibrary,
+    clearImage,
+    clearMessages,
+    dismissError,
+    errorCode,
+    image,
+    isModelSpeaking,
+    isRecording,
+    messages,
+    reconnect,
+    sendMessage,
+    status,
+    stopModelAudio,
+    takePhoto,
+    toggleMic,
+  } = useGeminiLiveChat();
+
+  const renderMessage = useCallback(
+    ({ item }: { item: GeminiChatMessage }) => (
+      <AiChatBubble message={item} />
+    ),
+    [],
+  );
+
+  const confirmClear = useCallback(() => {
+    Alert.alert(t("aiClearChat"), t("aiClearConfirm"), [
+      { style: "cancel", text: t("aiCancel") },
+      { onPress: clearMessages, style: "destructive", text: t("aiClearChat") },
+    ]);
+  }, [clearMessages, t]);
 
   return (
     <SafeAreaView
       edges={isOffline ? [] : ["top"]}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.flex}
+      >
         <View
-          style={[
-            styles.hero,
-            {
-              backgroundColor: colors.primary,
-              borderColor: colors.primaryDark,
-            },
-          ]}
+          style={[styles.header, { borderColor: colors.border }]}
         >
-          <View
-            style={[styles.heroIcon, { backgroundColor: colors.background }]}
-          >
-            <AppText style={styles.heroEmoji}>✨</AppText>
-          </View>
-          <AppText
-            variant="title"
-            style={[styles.title, { color: colors.primaryForeground }]}
-          >
-            {t("aiTitle")}
-          </AppText>
-          <AppText
-            style={[styles.description, { color: colors.primaryForeground }]}
-          >
-            {t("aiDescription")}
-          </AppText>
-          <View
-            style={[styles.badge, { backgroundColor: colors.background }]}
-          >
+          <View style={styles.headerCopy}>
             <AppText
-              variant="label"
-              style={[styles.badgeText, { color: colors.primaryDark }]}
+              variant="title"
+              style={[styles.title, { color: colors.foreground }]}
             >
-              {t("comingSoon")}
+              {t("aiTitle")}
+            </AppText>
+            <AppText
+              numberOfLines={1}
+              style={[styles.subtitle, { color: colors.mutedForeground }]}
+            >
+              {t("aiLiveSubtitle")}
             </AppText>
           </View>
+
+          {messages.length > 0 ? (
+            <Pressable
+              accessibilityLabel={t("aiClearChat")}
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={confirmClear}
+              style={({ pressed }) => [
+                styles.clearButton,
+                { opacity: pressed ? 0.5 : 1 },
+              ]}
+            >
+              <Ionicons
+                color={colors.mutedForeground}
+                name="trash-outline"
+                size={19}
+              />
+            </Pressable>
+          ) : null}
         </View>
 
-        <View style={styles.features}>
-          {FEATURES.map((feature) => (
-            <View
-              key={feature.title}
-              style={[styles.feature, { backgroundColor: colors.card, borderColor: colors.border }]}
-            >
-              <View
-                style={[styles.featureIcon, { backgroundColor: colors.muted }]}
-              >
-                <AppText style={styles.featureEmoji}>{feature.emoji}</AppText>
-              </View>
-              <View style={styles.featureCopy}>
-                <AppText
-                  variant="label"
-                  style={[styles.featureTitle, { color: colors.foreground }]}
-                >
-                  {t(feature.title)}
-                </AppText>
-                <AppText
-                  style={[
-                    styles.featureBody,
-                    { color: colors.mutedForeground },
-                  ]}
-                >
-                  {t(feature.body)}
-                </AppText>
-              </View>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+        <AiLiveStatus
+          errorCode={errorCode}
+          onDismissError={dismissError}
+          onRetry={reconnect}
+          status={status}
+        />
+
+        <FlatList
+          contentContainerStyle={[
+            styles.messages,
+            messages.length === 0 && styles.emptyMessages,
+          ]}
+          data={messages}
+          keyExtractor={(message) => message.id}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
+          ListEmptyComponent={
+            <AiEmptyChat onSelectSuggestion={setDraft} />
+          }
+          onContentSizeChange={() =>
+            listRef.current?.scrollToEnd({ animated: messages.length > 1 })
+          }
+          ref={listRef}
+          renderItem={renderMessage}
+          showsVerticalScrollIndicator={false}
+        />
+
+        <AiChatComposer
+          image={image}
+          isModelSpeaking={isModelSpeaking}
+          isRecording={isRecording}
+          onChangeText={setDraft}
+          onChooseImage={() => void chooseFromLibrary()}
+          onClearImage={clearImage}
+          onSend={sendMessage}
+          onStopModelAudio={stopModelAudio}
+          onTakePhoto={() => void takePhoto()}
+          onToggleMic={toggleMic}
+          status={status}
+          text={draft}
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  clearButton: {
+    alignItems: "center",
+    height: 36,
+    justifyContent: "center",
+    width: 32,
+  },
+  emptyMessages: {
+    flexGrow: 1,
+  },
+  flex: {
+    flex: 1,
+  },
+  header: {
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 68,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+  },
+  headerCopy: {
+    flex: 1,
+  },
+  messages: {
+    paddingBottom: 12,
+    paddingTop: 8,
+  },
   safeArea: { flex: 1 },
-  content: { padding: 20, paddingBottom: 32 },
-  hero: { alignItems: "center", borderRadius: 28, borderWidth: 1, padding: 24 },
-  heroIcon: { alignItems: "center", borderRadius: 32, height: 64, justifyContent: "center", width: 64 },
-  heroEmoji: { fontSize: 30, lineHeight: 40, textAlign: "center" },
-  title: { fontSize: 26, lineHeight: 44, marginTop: 14, textAlign: "center" },
-  description: { fontSize: 15, lineHeight: 26, marginTop: 4, opacity: 0.86, textAlign: "center" },
-  badge: { borderRadius: 999, marginTop: 18, paddingHorizontal: 14, paddingVertical: 7 },
-  badgeText: { fontSize: 12, lineHeight: 20, textAlign: "center" },
-  features: { gap: 12, marginTop: 20 },
-  feature: { alignItems: "center", borderRadius: 20, borderWidth: 1, flexDirection: "row", padding: 16 },
-  featureIcon: { alignItems: "center", borderRadius: 18, height: 50, justifyContent: "center", width: 50 },
-  featureEmoji: { fontSize: 23, lineHeight: 32, textAlign: "center" },
-  featureCopy: { flex: 1, marginStart: 14 },
-  featureTitle: { fontSize: 16, lineHeight: 27 },
-  featureBody: { fontSize: 13, lineHeight: 23, marginTop: 2 },
+  subtitle: {
+    fontSize: 12,
+    lineHeight: 19,
+    marginTop: -1,
+  },
+  title: {
+    fontSize: 19,
+    lineHeight: 30,
+  },
 });

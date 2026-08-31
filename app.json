@@ -8,7 +8,10 @@
     "scheme": "kisaanai",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Kisaan AI uses your microphone for live voice conversations about your farm."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,6 +20,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
       "predictiveBackGestureEnabled": false
     },
     "web": {
@@ -54,6 +61,19 @@
           "locationWhenInUsePermission": "Kisaan AI uses your location to show the weather and farming advice for your area.",
           "locationAlwaysAndWhenInUsePermission": "Kisaan AI uses your location to show the weather and farming advice for your area."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Kisaan AI uses your camera to photograph crops for farming guidance.",
+          "photosPermission": "Kisaan AI uses your photos so you can share crop images for farming guidance."
+        }
+      ],
+      [
+        "@mykin-ai/expo-audio-stream",
+        [
+          "android.permission.RECORD_AUDIO"
+        ]
       ]
     ],
     "experiments": {
