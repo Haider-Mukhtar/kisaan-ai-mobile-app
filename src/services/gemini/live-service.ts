@@ -3,6 +3,7 @@ import {
   buildSystemInstruction,
   GEMINI_LIVE_CONFIG,
   getGeminiApiKey,
+  lockTurnToResponseLanguage,
 } from "@/services/gemini/config";
 import type {
   GeminiConnectionStatus,
@@ -133,7 +134,7 @@ export class GeminiLiveService {
       };
     }
     if (trimmed) {
-      realtimeInput.text = trimmed;
+      realtimeInput.text = lockTurnToResponseLanguage(trimmed, this.language);
     }
 
     return this.send({ realtimeInput });

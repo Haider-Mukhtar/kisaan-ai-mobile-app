@@ -87,13 +87,32 @@ SAFETY
 - Do not invent personal details, farm size, or location. Do not read out GPS coordinates unless they help (for example to confirm the district).
 `.trim();
 
+/** Prefixes a user turn so Gemini keeps Urdu-script replies even for English input. */
+export function lockTurnToResponseLanguage(
+  text: string,
+  language: "en" | "ur",
+): string {
+  if (language !== "ur") {
+    return text;
+  }
+
+  return `جواب اردو رسم الخط میں دیں، رومن اردو میں نہیں۔\n${text}`;
+}
+
 export function buildSystemInstruction(
   language: "en" | "ur",
   farmerContext = "",
 ): string {
   const responseLanguage =
     language === "ur"
-      ? "Reply in clear, natural spoken Urdu (everyday village Urdu, not formal or literary) unless the farmer asks for another language. You may use common farm words farmers already know, such as wari, mandi, dawai, and keera."
+      ? [
+          "RESPONSE LANGUAGE — URDU SCRIPT",
+          "The farmer chose Urdu in the app. Always speak everyday Pakistani village Urdu, and always write the reply in Urdu script (نستعلیق / Perso-Arabic letters).",
+          "Correct written reply: پتے پیلے پڑ رہے ہیں تو پہلے پانی روکیں اور متاثرہ پتے توڑ دیں۔",
+          "Wrong: Roman Urdu in Latin letters, such as \"Patte peele pad rahe hain to pehle pani rokain.\"",
+          "Keep this script even if the farmer types English, Roman Urdu, or mixed Latin letters. Do not match their keyboard. Only switch to English if they clearly ask in words to answer in English.",
+          "Use common farm words in Urdu script: واری، منڈی، دوائی، کیڑا.",
+        ].join(" ")
       : "Reply in clear, simple spoken English unless the farmer asks for another language. Use the local crop names tomato, potato, and wheat, and Pakistani farm terms such as canal turn, mandi, and acre.";
 
   const base = `${KISAAN_AI_SYSTEM_INSTRUCTION}\n\n${responseLanguage}`;
