@@ -28,20 +28,19 @@ function encodeBase64(bytes: Uint8Array): string {
   return globalThis.btoa(binary);
 }
 
-/**
- * Gemini emits signed 16-bit little-endian mono PCM at 24 kHz. The native
- * streaming player accepts 16, 44.1, or 48 kHz, so interpolate to 48 kHz.
- */
-export function resamplePcm16Base64From24kTo48k(base64: string): string {
+/** Converts Gemini's signed 16-bit little-endian PCM into Web Audio samples. */
+export function pcm16Base64ToFloat32(
+  base64: string,
+): Float32Array<ArrayBuffer> {
   if (!base64) {
-    return "";
+    return new Float32Array(0);
   }
 
   const sourceBytes = decodeBase64(base64);
   const sourceLength = Math.floor(sourceBytes.byteLength / 2);
 
   if (sourceLength === 0) {
-    return "";
+    return new Float32Array(0);
   }
 
   const sourceView = new DataView(
@@ -49,20 +48,68 @@ export function resamplePcm16Base64From24kTo48k(base64: string): string {
     sourceBytes.byteOffset,
     sourceLength * 2,
   );
-  const outputBytes = new Uint8Array(sourceLength * 4);
-  const outputView = new DataView(outputBytes.buffer);
+  const samples = new Float32Array(sourceLength);
 
   for (let index = 0; index < sourceLength; index += 1) {
-    const current = sourceView.getInt16(index * 2, true);
-    const next =
-      index + 1 < sourceLength
-        ? sourceView.getInt16((index + 1) * 2, true)
-        : current;
-    const midpoint = Math.round((current + next) / 2);
-
-    outputView.setInt16(index * 4, current, true);
-    outputView.setInt16(index * 4 + 2, midpoint, true);
+    const sample = sourceView.getInt16(index * 2, true);
+    samples[index] = sample < 0 ? sample / 32_768 : sample / 32_767;
   }
 
-  return encodeBase64(outputBytes);
+  return samples;
+}
+
+/** Converts normalized microphone samples to signed 16-bit LE PCM base64. */
+export function float32ToPcm16Base64(
+  samples: Float32Array<ArrayBufferLike>,
+): string {
+  if (samples.length === 0) {
+    return "";
+  }
+
+  const bytes = new Uint8Array(samples.length * 2);
+  const view = new DataView(bytes.buffer);
+
+  for (let index = 0; index < samples.length; index += 1) {
+    const clamped = Math.max(-1, Math.min(1, samples[index]));
+    const pcm16 =
+      clamped < 0 ? Math.round(clamped * 32_768) : Math.round(clamped * 32_767);
+    view.setInt16(index * 2, pcm16, true);
+  }
+
+  return encodeBase64(bytes);
+}
+
+/** Resamples mono float PCM when a device cannot provide the requested rate. */
+export function resampleFloat32(
+  samples: Float32Array<ArrayBufferLike>,
+  sourceRate: number,
+  targetRate: number,
+): Float32Array<ArrayBuffer> {
+  if (
+    samples.length === 0 ||
+    sourceRate <= 0 ||
+    targetRate <= 0 ||
+    sourceRate === targetRate
+  ) {
+    return new Float32Array(samples);
+  }
+
+  const outputLength = Math.max(
+    1,
+    Math.round((samples.length * targetRate) / sourceRate),
+  );
+  const output = new Float32Array(outputLength);
+  const ratio = sourceRate / targetRate;
+
+  for (let index = 0; index < outputLength; index += 1) {
+    const sourcePosition = index * ratio;
+    const leftIndex = Math.min(Math.floor(sourcePosition), samples.length - 1);
+    const rightIndex = Math.min(leftIndex + 1, samples.length - 1);
+    const fraction = sourcePosition - leftIndex;
+    output[index] =
+      samples[leftIndex] +
+      (samples[rightIndex] - samples[leftIndex]) * fraction;
+  }
+
+  return output;
 }

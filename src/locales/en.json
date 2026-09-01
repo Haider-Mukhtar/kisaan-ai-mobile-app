@@ -162,6 +162,7 @@
   "aiErrorSessionRestarted": "The live session restarted. Earlier messages remain visible, but Gemini may not remember them.",
   "aiErrorSend": "The message could not be sent because the live connection is not ready.",
   "aiErrorInvalidResponse": "Kisaan AI sent an unreadable response. Please reconnect.",
+  "aiErrorAudioPlayback": "Gemini sent audio, but your phone could not play it. Reopen the AI tab and try again.",
   "aiErrorMicrophonePermission": "Microphone access is required for live voice. Allow it in phone settings.",
   "aiErrorMicrophoneStart": "The microphone could not start. Live voice requires a development build on a physical device.",
   "aiErrorImagePermission": "Camera or photo access was not allowed. You can enable it in phone settings.",

@@ -39,12 +39,12 @@ export function useGeminiLiveChat() {
   });
   isOnlineRef.current = isOnline;
 
-  const { configure, nextTurn, playChunk, stopPlayback } =
-    useGeminiAudioPlayer();
-
   const handleError = useCallback((code: GeminiErrorCode) => {
     setErrorCode(code);
   }, []);
+
+  const { configure, dispose, nextTurn, playChunk, stopPlayback } =
+    useGeminiAudioPlayer({ onError: handleError });
 
   const sendAudioChunk = useCallback((base64: string) => {
     serviceRef.current?.sendAudioChunk(base64);
@@ -196,7 +196,7 @@ export function useGeminiLiveChat() {
         focusedRef.current = false;
         appStateSubscription.remove();
         void stopMic(false);
-        void stopPlayback();
+        void dispose();
         service.disconnect();
         if (serviceRef.current === service) {
           serviceRef.current = null;
@@ -205,6 +205,7 @@ export function useGeminiLiveChat() {
     }, [
       appendTranscript,
       configure,
+      dispose,
       finalizeTurn,
       handleAudioChunk,
       handleError,

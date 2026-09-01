@@ -22,6 +22,7 @@ const STATUS_KEYS: Record<GeminiConnectionStatus, TranslationKey> = {
 };
 
 const ERROR_KEYS: Record<GeminiErrorCode, TranslationKey> = {
+  "audio-playback": "aiErrorAudioPlayback",
   connection: "aiErrorConnection",
   "connection-lost": "aiErrorConnectionLost",
   "image-permission": "aiErrorImagePermission",

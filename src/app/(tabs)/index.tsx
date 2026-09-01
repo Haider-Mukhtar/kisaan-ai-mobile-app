@@ -1,5 +1,5 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-screens/experimental";
 
 import { AppText } from "@/components/ui/app-text";
 import { WeatherCard } from "@/components/weather/weather-card";
@@ -19,7 +19,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView
-      edges={isOffline ? [] : ["top"]}
+      edges={{ bottom: true, top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <ScrollView

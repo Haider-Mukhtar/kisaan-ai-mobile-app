@@ -9,7 +9,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-screens/experimental";
 
 import { AiChatBubble } from "@/components/ai/chat-bubble";
 import { AiChatComposer } from "@/components/ai/chat-composer";
@@ -62,11 +62,12 @@ export default function AiScreen() {
 
   return (
     <SafeAreaView
-      edges={isOffline ? [] : ["top"]}
+      edges={{ bottom: true, top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        enabled
         style={styles.flex}
       >
         <View
@@ -121,7 +122,7 @@ export default function AiScreen() {
           ]}
           data={messages}
           keyExtractor={(message) => message.id}
-          keyboardDismissMode="interactive"
+          keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}
           keyboardShouldPersistTaps="handled"
           ListEmptyComponent={
             <AiEmptyChat onSelectSuggestion={setDraft} />

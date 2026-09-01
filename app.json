@@ -10,10 +10,17 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Kisaan AI uses your microphone for live voice conversations about your farm."
-      }
+        "NSMicrophoneUsageDescription": "Kisaan AI uses your microphone for live voice conversations about your farm.",
+        "ExpoLocalization_supportsRTL": true,
+        "CFBundleLocalizations": [
+          "en",
+          "ur"
+        ]
+      },
+      "bundleIdentifier": "com.haiderdev1.KisaanAI"
     },
     "android": {
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -22,9 +29,12 @@
       },
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ],
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.haiderdev1.KisaanAI"
     },
     "web": {
       "output": "static",
@@ -70,10 +80,16 @@
         }
       ],
       [
-        "@mykin-ai/expo-audio-stream",
-        [
-          "android.permission.RECORD_AUDIO"
-        ]
+        "react-native-audio-api",
+        {
+          "iosMicrophonePermission": "Kisaan AI uses your microphone for live voice conversations about your farm.",
+          "iosBackgroundMode": false,
+          "androidPermissions": [
+            "android.permission.RECORD_AUDIO"
+          ],
+          "androidForegroundService": false,
+          "disableFFmpeg": true
+        }
       ]
     ],
     "experiments": {

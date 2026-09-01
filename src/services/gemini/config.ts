@@ -5,7 +5,6 @@ export const GEMINI_LIVE_CONFIG = {
     "google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent",
   inputSampleRate: 16_000,
   modelOutputSampleRate: 24_000,
-  playbackSampleRate: 48_000,
   audioChunkIntervalMs: 100,
   maxImageBytes: 8 * 1024 * 1024,
   maxReconnectAttempts: 3,

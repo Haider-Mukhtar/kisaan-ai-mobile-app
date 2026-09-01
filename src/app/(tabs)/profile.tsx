@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useState, type ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-screens/experimental";
 
 import {
   PreferenceSelector,
@@ -76,7 +76,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView
-      edges={isOffline ? [] : ["top"]}
+      edges={{ bottom: true, top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <ScrollView

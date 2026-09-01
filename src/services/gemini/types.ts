@@ -13,6 +13,7 @@ export type GeminiErrorCode =
   | "session-restarted"
   | "send"
   | "invalid-response"
+  | "audio-playback"
   | "microphone-permission"
   | "microphone-start"
   | "image-permission"
