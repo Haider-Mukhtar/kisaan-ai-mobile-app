@@ -8,7 +8,7 @@
     "scheme": "kisaanai",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/images/icon.png",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Kisaan AI uses your microphone for live voice conversations about your farm.",
         "ExpoLocalization_supportsRTL": true,
@@ -21,11 +21,10 @@
     },
     "android": {
       "softwareKeyboardLayoutMode": "resize",
+      "icon": "./assets/images/icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/images/icon.png"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -45,7 +44,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#061510"
+          "backgroundColor": "#061510",
+          "image": "./assets/images/splash-icon.png"
         }
       ],
       [
