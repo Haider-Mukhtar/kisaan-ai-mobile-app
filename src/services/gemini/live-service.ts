@@ -14,11 +14,14 @@ import type {
 type LiveServiceOptions = {
   callbacks: GeminiLiveCallbacks;
   language: "en" | "ur";
+  /** Preformatted farm profile block from `describeFarmerForGemini`. */
+  farmerContext?: string;
 };
 
 export class GeminiLiveService {
   private readonly callbacks: GeminiLiveCallbacks;
   private readonly language: "en" | "ur";
+  private readonly farmerContext: string;
   private websocket: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
@@ -28,9 +31,10 @@ export class GeminiLiveService {
   private resumptionHandle: string | null = null;
   private connectionStatus: GeminiConnectionStatus = "idle";
 
-  constructor({ callbacks, language }: LiveServiceOptions) {
+  constructor({ callbacks, language, farmerContext = "" }: LiveServiceOptions) {
     this.callbacks = callbacks;
     this.language = language;
+    this.farmerContext = farmerContext;
   }
 
   connect(isReconnect = false): void {
@@ -193,7 +197,9 @@ export class GeminiLiveService {
         },
         sessionResumption,
         systemInstruction: {
-          parts: [{ text: buildSystemInstruction(this.language) }],
+          parts: [
+            { text: buildSystemInstruction(this.language, this.farmerContext) },
+          ],
         },
       },
     });

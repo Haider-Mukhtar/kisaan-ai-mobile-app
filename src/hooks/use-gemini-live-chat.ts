@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppState } from "react-native";
 
 import { useGeminiAudioPlayer } from "@/hooks/use-gemini-audio-player";
@@ -7,6 +7,8 @@ import { useGeminiAudioStream } from "@/hooks/use-gemini-audio-stream";
 import { useGeminiImage } from "@/hooks/use-gemini-image";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
+import { useProfile } from "@/providers/profile-provider";
+import { describeFarmerForGemini } from "@/services/gemini/farmer-context";
 import { GeminiLiveService } from "@/services/gemini/live-service";
 import type {
   ChatRole,
@@ -18,6 +20,11 @@ import type {
 export function useGeminiLiveChat() {
   const { language } = useLanguage();
   const { isOnline } = useNetwork();
+  const { profile } = useProfile();
+  const farmerContext = useMemo(
+    () => describeFarmerForGemini(profile),
+    [profile],
+  );
   const [messages, setMessages] = useState<GeminiChatMessage[]>([]);
   const [status, setStatus] =
     useState<GeminiConnectionStatus>("idle");
@@ -173,6 +180,7 @@ export function useGeminiLiveChat() {
           onTranscript: appendTranscript,
           onTurnComplete: finalizeTurn,
         },
+        farmerContext,
         language,
       });
       serviceRef.current = service;
@@ -206,6 +214,7 @@ export function useGeminiLiveChat() {
       appendTranscript,
       configure,
       dispose,
+      farmerContext,
       finalizeTurn,
       handleAudioChunk,
       handleError,

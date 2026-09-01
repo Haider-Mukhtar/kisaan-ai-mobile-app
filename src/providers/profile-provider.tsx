@@ -13,6 +13,10 @@ import { useAuth } from "@/providers/auth-provider";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import {
+  readCachedProfile,
+  writeCachedProfile,
+} from "@/services/profile/device-cache";
+import {
   loadOrSeedProfile,
   saveFarmLocation,
   saveFarmProfile,
@@ -54,7 +58,7 @@ const ProfileContext = createContext<ProfileContextValue | undefined>(
 
 export function ProfileProvider({ children }: PropsWithChildren) {
   const { t } = useLanguage();
-  const { ensureOnline } = useNetwork();
+  const { ensureOnline, isOnline } = useNetwork();
   const { isAuthenticated, isReady: isAuthReady, user } = useAuth();
   const tRef = useRef(t);
   const [loaded, setLoaded] = useState<LoadedProfile | null>(null);
@@ -83,28 +87,56 @@ export function ProfileProvider({ children }: PropsWithChildren) {
 
     let active = true;
 
-    void loadOrSeedProfile(userId, metadataPhone)
-      .then(({ data, error }) => {
+    void (async () => {
+      // Paint the on-device copy first so crops and location stay available
+      // offline, then replace it with the server row when we have a signal.
+      const cached = await readCachedProfile(userId);
+
+      if (!active) {
+        return;
+      }
+
+      if (cached) {
+        setLoaded({ userId, profile: cached });
+      }
+
+      if (!isOnline) {
+        if (!cached) {
+          setLoaded({ userId, profile: null });
+        }
+        return;
+      }
+
+      try {
+        const { data, error } = await loadOrSeedProfile(userId, metadataPhone);
+
         if (!active) {
           return;
         }
 
         if (error) {
-          showErrorToast(tRef.current("profileLoadErrorTitle"), error.message);
+          if (!cached) {
+            showErrorToast(tRef.current("profileLoadErrorTitle"), error.message);
+            setLoaded({ userId, profile: null });
+          }
+          return;
         }
 
-        setLoaded({ userId, profile: error ? null : data });
-      })
-      .catch(() => {
-        if (active) {
+        setLoaded({ userId, profile: data });
+        if (data) {
+          void writeCachedProfile(data);
+        }
+      } catch {
+        if (active && !cached) {
           setLoaded({ userId, profile: null });
         }
-      });
+      }
+    })();
 
     return () => {
       active = false;
     };
-  }, [isAuthReady, metadataPhone, userId]);
+  }, [isAuthReady, isOnline, metadataPhone, userId]);
 
   const saveProfile = useCallback(
     async (draft: FarmProfileDraft) => {
@@ -123,6 +155,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         }
 
         setLoaded({ userId, profile: data });
+        void writeCachedProfile(data);
         showSuccessToast(tRef.current("profileSaveSuccessTitle"));
         return true;
       } catch {
@@ -158,6 +191,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         }
 
         setLoaded({ userId, profile: data });
+        void writeCachedProfile(data);
         showSuccessToast(tRef.current("locationSaveSuccessTitle"));
         return true;
       } catch {
