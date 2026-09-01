@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-screens/experimental";
 import { AiChatBubble } from "@/components/ai/chat-bubble";
 import { AiChatComposer } from "@/components/ai/chat-composer";
 import { AiEmptyChat } from "@/components/ai/empty-chat";
-import { AiLiveStatus } from "@/components/ai/live-status";
+import { AiLiveError, AiLiveStatus } from "@/components/ai/live-status";
 import { AppText } from "@/components/ui/app-text";
 import { useGeminiLiveChat } from "@/hooks/use-gemini-live-chat";
 import useThemeManager from "@/hooks/use-theme-manager";
@@ -88,32 +88,31 @@ export default function AiScreen() {
             </AppText>
           </View>
 
-          {messages.length > 0 ? (
-            <Pressable
-              accessibilityLabel={t("aiClearChat")}
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={confirmClear}
-              style={({ pressed }) => [
-                styles.clearButton,
-                { opacity: pressed ? 0.5 : 1 },
-              ]}
-            >
-              <Ionicons
-                color={colors.mutedForeground}
-                name="trash-outline"
-                size={19}
-              />
-            </Pressable>
-          ) : null}
+          <View style={styles.headerActions}>
+            <AiLiveStatus onRetry={reconnect} status={status} />
+
+            {messages.length > 0 ? (
+              <Pressable
+                accessibilityLabel={t("aiClearChat")}
+                accessibilityRole="button"
+                hitSlop={8}
+                onPress={confirmClear}
+                style={({ pressed }) => [
+                  styles.clearButton,
+                  { opacity: pressed ? 0.5 : 1 },
+                ]}
+              >
+                <Ionicons
+                  color={colors.mutedForeground}
+                  name="trash-outline"
+                  size={19}
+                />
+              </Pressable>
+            ) : null}
+          </View>
         </View>
 
-        <AiLiveStatus
-          errorCode={errorCode}
-          onDismissError={dismissError}
-          onRetry={reconnect}
-          status={status}
-        />
+        <AiLiveError errorCode={errorCode} onDismissError={dismissError} />
 
         <FlatList
           contentContainerStyle={[
@@ -176,8 +175,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 9,
   },
+  headerActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexShrink: 0,
+    gap: 2,
+  },
   headerCopy: {
     flex: 1,
+    minWidth: 0,
   },
   messages: {
     paddingBottom: 12,

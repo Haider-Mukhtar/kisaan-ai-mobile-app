@@ -37,118 +37,121 @@ const ERROR_KEYS: Record<GeminiErrorCode, TranslationKey> = {
   "session-restarted": "aiErrorSessionRestarted",
 };
 
-type Props = {
-  errorCode: GeminiErrorCode | null;
-  onDismissError: () => void;
+type StatusProps = {
   onRetry: () => void;
   status: GeminiConnectionStatus;
 };
 
-export function AiLiveStatus({
-  errorCode,
-  onDismissError,
-  onRetry,
-  status,
-}: Props) {
+export function AiLiveStatus({ onRetry, status }: StatusProps) {
   const { colors } = useThemeManager();
   const { t } = useLanguage();
   const isConnected = status === "connected";
 
   return (
-    <View>
-      <View style={styles.statusRow}>
+    <View style={styles.statusRow}>
+      <View
+        accessibilityLiveRegion="polite"
+        style={[
+          styles.statusPill,
+          {
+            backgroundColor: isConnected ? colors.primary : colors.muted,
+            borderColor: isConnected ? colors.primaryDark : colors.border,
+          },
+        ]}
+      >
         <View
-          accessibilityLiveRegion="polite"
           style={[
-            styles.statusPill,
+            styles.statusDot,
             {
-              backgroundColor: isConnected ? colors.primary : colors.muted,
-              borderColor: isConnected ? colors.primaryDark : colors.border,
+              backgroundColor: isConnected
+                ? colors.success
+                : status === "error"
+                  ? colors.red
+                  : colors.warning,
+            },
+          ]}
+        />
+        <AppText
+          numberOfLines={1}
+          variant="label"
+          style={[
+            styles.statusText,
+            {
+              color: isConnected
+                ? colors.primaryForeground
+                : colors.mutedForeground,
             },
           ]}
         >
-          <View
-            style={[
-              styles.statusDot,
-              {
-                backgroundColor: isConnected
-                  ? colors.success
-                  : status === "error"
-                    ? colors.red
-                    : colors.warning,
-              },
-            ]}
-          />
-          <AppText
-            variant="label"
-            style={[
-              styles.statusText,
-              {
-                color: isConnected
-                  ? colors.primaryForeground
-                  : colors.mutedForeground,
-              },
-            ]}
-          >
-            {t(STATUS_KEYS[status])}
-          </AppText>
-        </View>
-
-        {!isConnected && status !== "connecting" ? (
-          <Pressable
-            accessibilityLabel={t("aiRetry")}
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={onRetry}
-            style={({ pressed }) => [
-              styles.retry,
-              { opacity: pressed ? 0.55 : 1 },
-            ]}
-          >
-            <Ionicons color={colors.foreground} name="refresh" size={18} />
-          </Pressable>
-        ) : null}
+          {t(STATUS_KEYS[status])}
+        </AppText>
       </View>
 
-      {errorCode ? (
-        <View
-          accessibilityLiveRegion="assertive"
-          accessibilityRole="alert"
-          style={[
-            styles.error,
-            {
-              backgroundColor: colors.destructive,
-              borderColor: colors.red,
-            },
+      {!isConnected && status !== "connecting" ? (
+        <Pressable
+          accessibilityLabel={t("aiRetry")}
+          accessibilityRole="button"
+          hitSlop={8}
+          onPress={onRetry}
+          style={({ pressed }) => [
+            styles.retry,
+            { opacity: pressed ? 0.55 : 1 },
           ]}
         >
-          <Ionicons
-            color={colors.destructiveForeground}
-            name="alert-circle-outline"
-            size={20}
-          />
-          <AppText
-            style={[
-              styles.errorCopy,
-              { color: colors.destructiveForeground },
-            ]}
-          >
-            {t(ERROR_KEYS[errorCode])}
-          </AppText>
-          <Pressable
-            accessibilityLabel={t("aiDismiss")}
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={onDismissError}
-          >
-            <Ionicons
-              color={colors.destructiveForeground}
-              name="close"
-              size={20}
-            />
-          </Pressable>
-        </View>
+          <Ionicons color={colors.foreground} name="refresh" size={18} />
+        </Pressable>
       ) : null}
+    </View>
+  );
+}
+
+type ErrorProps = {
+  errorCode: GeminiErrorCode | null;
+  onDismissError: () => void;
+};
+
+export function AiLiveError({ errorCode, onDismissError }: ErrorProps) {
+  const { colors } = useThemeManager();
+  const { t } = useLanguage();
+
+  if (!errorCode) {
+    return null;
+  }
+
+  return (
+    <View
+      accessibilityLiveRegion="assertive"
+      accessibilityRole="alert"
+      style={[
+        styles.error,
+        {
+          backgroundColor: colors.destructive,
+          borderColor: colors.red,
+        },
+      ]}
+    >
+      <Ionicons
+        color={colors.destructiveForeground}
+        name="alert-circle-outline"
+        size={20}
+      />
+      <AppText
+        style={[styles.errorCopy, { color: colors.destructiveForeground }]}
+      >
+        {t(ERROR_KEYS[errorCode])}
+      </AppText>
+      <Pressable
+        accessibilityLabel={t("aiDismiss")}
+        accessibilityRole="button"
+        hitSlop={8}
+        onPress={onDismissError}
+      >
+        <Ionicons
+          color={colors.destructiveForeground}
+          name="close"
+          size={20}
+        />
+      </Pressable>
     </View>
   );
 }
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 34,
     justifyContent: "center",
-    width: 34,
+    width: 28,
   },
   statusDot: {
     borderRadius: 4,
@@ -183,16 +186,17 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     borderWidth: 1,
     flexDirection: "row",
-    gap: 7,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    flexShrink: 1,
+    gap: 6,
+    maxWidth: 148,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
   },
   statusRow: {
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "space-between",
-    minHeight: 38,
-    paddingHorizontal: 16,
+    flexShrink: 1,
+    gap: 2,
   },
   statusText: {
     fontSize: 11,
