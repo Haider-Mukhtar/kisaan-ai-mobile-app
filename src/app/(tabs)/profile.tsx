@@ -319,7 +319,8 @@ function ActionButton({
   onPress: () => void;
 }) {
   const { colors } = useThemeManager();
-  const textColor = destructive ? colors.destructive : colors.foreground;
+  // Dark `destructive` is a fill color and disappears as text; `red` stays readable.
+  const accentColor = destructive ? colors.red : colors.foreground;
 
   return (
     <Pressable
@@ -329,7 +330,10 @@ function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.action,
-        { backgroundColor: colors.card, borderColor: colors.border },
+        {
+          backgroundColor: colors.card,
+          borderColor: destructive ? colors.red : colors.border,
+        },
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}
@@ -337,7 +341,7 @@ function ActionButton({
       <View
         style={[
           styles.actionIcon,
-          { backgroundColor: destructive ? colors.destructive : colors.muted },
+          { backgroundColor: destructive ? colors.red : colors.muted },
         ]}
       >
         <AppText
@@ -355,7 +359,7 @@ function ActionButton({
       </View>
       <AppText
         variant="label"
-        style={[styles.actionLabel, { color: textColor }]}
+        style={[styles.actionLabel, { color: accentColor }]}
       >
         {label}
       </AppText>
