@@ -21,6 +21,7 @@ type Props = {
   image: PendingImage | null;
   isModelSpeaking: boolean;
   isRecording: boolean;
+  nativeID?: string;
   onChooseImage: () => void;
   onClearImage: () => void;
   onSend: (text: string) => boolean;
@@ -36,6 +37,7 @@ export function AiChatComposer({
   image,
   isModelSpeaking,
   isRecording,
+  nativeID,
   onChangeText,
   onChooseImage,
   onClearImage,
@@ -172,6 +174,7 @@ export function AiChatComposer({
           editable={!isRecording}
           maxLength={4_000}
           multiline
+          nativeID={nativeID}
           onChangeText={onChangeText}
           placeholder={t("aiTypePlaceholder")}
           placeholderTextColor={colors.mutedForeground}
@@ -183,6 +186,7 @@ export function AiChatComposer({
               textAlign,
             },
           ]}
+          textAlignVertical="top"
           value={text}
         />
 
@@ -255,6 +259,7 @@ const styles = StyleSheet.create({
   container: {
     borderTopWidth: StyleSheet.hairlineWidth,
     gap: 8,
+    paddingBottom: 10,
     paddingHorizontal: 12,
     paddingTop: 10,
   },

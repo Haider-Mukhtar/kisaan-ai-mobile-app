@@ -10,6 +10,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Inter_400Regular, Inter_600SemiBold } from "@expo-google-fonts/inter";
 import { NotoNaskhArabic_400Regular } from "@expo-google-fonts/noto-naskh-arabic";
@@ -64,24 +65,26 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ThemeProvider>
-        <LanguageProvider>
-          <NetworkProvider>
-            <AuthProvider>
-              <ProfileProvider>
-                <PhoneAuthProvider>
-                  <OnboardingProvider>
-                    <WeatherProvider>
-                      <ThemedRootLayout />
-                    </WeatherProvider>
-                  </OnboardingProvider>
-                </PhoneAuthProvider>
-              </ProfileProvider>
-            </AuthProvider>
-          </NetworkProvider>
-        </LanguageProvider>
-        <Toast config={toastConfig} />
-      </ThemeProvider>
+      <KeyboardProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <NetworkProvider>
+              <AuthProvider>
+                <ProfileProvider>
+                  <PhoneAuthProvider>
+                    <OnboardingProvider>
+                      <WeatherProvider>
+                        <ThemedRootLayout />
+                      </WeatherProvider>
+                    </OnboardingProvider>
+                  </PhoneAuthProvider>
+                </ProfileProvider>
+              </AuthProvider>
+            </NetworkProvider>
+          </LanguageProvider>
+          <Toast config={toastConfig} />
+        </ThemeProvider>
+      </KeyboardProvider>
     </SafeAreaProvider>
   );
 }
