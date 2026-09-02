@@ -126,11 +126,11 @@ export const DISTRICTS: District[] = [
 ];
 
 /**
- * Central Punjab farming hub, used when a farmer declines the location
+ * Lahore is used when a farmer declines the location
  * permission and does not pick a district either. Weather still renders, and
  * the "change location" button lets them correct it.
  */
-export const DEFAULT_DISTRICT_ID = "multan";
+export const DEFAULT_DISTRICT_ID = "lahore";
 
 const DISTRICTS_BY_ID = new Map(DISTRICTS.map((district) => [district.id, district]));
 

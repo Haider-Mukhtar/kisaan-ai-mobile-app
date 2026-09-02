@@ -9,25 +9,19 @@ import {
 } from "@/components/profile/preference-selector";
 import { AppText } from "@/components/ui/app-text";
 import { getDistrict, getDistrictName } from "@/constants/districts";
+import { getCropLabelKey } from "@/constants/crops";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useAuth } from "@/providers/auth-provider";
 import {
   useLanguage,
   type LanguageCode,
-  type TranslationKey,
 } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import { useOnboarding } from "@/providers/onboarding-provider";
 import { useProfile } from "@/providers/profile-provider";
 import type { ThemePreference } from "@/providers/theme-provider";
 import { formatPakistaniMobile } from "@/utils/phone";
-
-const CROP_LABELS: Record<string, TranslationKey> = {
-  potato: "cropPotato",
-  tomato: "cropTomato",
-  wheat: "cropWheat",
-};
 
 const LANGUAGE_OPTIONS: PreferenceOption<LanguageCode>[] = [
   {
@@ -58,7 +52,10 @@ export default function ProfileScreen() {
   const district = getDistrict(profile?.location?.districtId);
   const crops =
     profile?.crops
-      .map((crop) => (CROP_LABELS[crop] ? t(CROP_LABELS[crop]) : crop))
+      .map((crop) => {
+        const labelKey = getCropLabelKey(crop);
+        return labelKey ? t(labelKey) : crop;
+      })
       .join(", ") || t("settingsNotProvided");
   const displayName = profile?.fullName || t("settingsNotProvided");
   const initial = profile?.fullName?.trim().charAt(0).toLocaleUpperCase() || "K";
