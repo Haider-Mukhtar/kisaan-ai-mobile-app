@@ -95,6 +95,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "36b6804a-9a43-4370-8310-5e4fe8cd2380"
+      }
+    },
+    "owner": "haidermukhtar"
   }
 }
