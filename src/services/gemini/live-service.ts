@@ -11,6 +11,8 @@ import type {
   GeminiServerMessage,
   GeminiTurnInput,
 } from "@/services/gemini/types";
+import { loadMandiSnapshotForGemini } from "@/services/mandi/gemini-snapshot";
+import type { MandiSnapshot } from "@/services/mandi/types";
 
 type LiveServiceOptions = {
   callbacks: GeminiLiveCallbacks;
@@ -31,6 +33,9 @@ export class GeminiLiveService {
   private setupComplete = false;
   private resumptionHandle: string | null = null;
   private connectionStatus: GeminiConnectionStatus = "idle";
+  private mandiSnapshot: MandiSnapshot | null = null;
+  private mandiSnapshotPrepared = false;
+  private mandiSnapshotPreparation: Promise<void> | null = null;
 
   constructor({ callbacks, language, farmerContext = "" }: LiveServiceOptions) {
     this.callbacks = callbacks;
@@ -50,6 +55,37 @@ export class GeminiLiveService {
     if (!apiKey) {
       this.setStatus("error");
       this.callbacks.onError("missing-key");
+      return;
+    }
+
+    if (!this.mandiSnapshotPrepared) {
+      this.intentionalClose = false;
+      this.setStatus(isReconnect ? "reconnecting" : "connecting");
+
+      if (!this.mandiSnapshotPreparation) {
+        this.mandiSnapshotPreparation = loadMandiSnapshotForGemini()
+          .then((snapshot) => {
+            this.mandiSnapshot = snapshot;
+          })
+          .finally(() => {
+            this.mandiSnapshotPrepared = true;
+            this.mandiSnapshotPreparation = null;
+            if (!this.intentionalClose) {
+              this.openSocket(apiKey, isReconnect);
+            }
+          });
+      }
+      return;
+    }
+
+    this.openSocket(apiKey, isReconnect);
+  }
+
+  private openSocket(apiKey: string, isReconnect: boolean): void {
+    if (
+      this.websocket?.readyState === WebSocket.CONNECTING ||
+      this.websocket?.readyState === WebSocket.OPEN
+    ) {
       return;
     }
 
@@ -199,7 +235,13 @@ export class GeminiLiveService {
         sessionResumption,
         systemInstruction: {
           parts: [
-            { text: buildSystemInstruction(this.language, this.farmerContext) },
+            {
+              text: buildSystemInstruction(
+                this.language,
+                this.farmerContext,
+                this.mandiSnapshot,
+              ),
+            },
           ],
         },
       },
