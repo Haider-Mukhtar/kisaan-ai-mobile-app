@@ -6,6 +6,7 @@ import { OnboardingButton } from "@/components/onboarding/onboarding-button";
 import { OnboardingShell } from "@/components/onboarding/onboarding-shell";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
+import { androidNastaliqHeadingStyle } from "@/utils/typography";
 
 type Artwork = "companion" | "diagnosis" | "decisions";
 
@@ -136,6 +137,7 @@ const styles = StyleSheet.create({
     lineHeight: 44,
     textAlign: "right",
     writingDirection: "rtl",
+    ...androidNastaliqHeadingStyle(22, 44),
   },
   urduBody: {
     fontFamily: Fonts.notoNaskhArabic,

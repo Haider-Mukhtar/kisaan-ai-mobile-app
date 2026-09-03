@@ -14,6 +14,7 @@ import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
+import { androidNastaliqHeadingStyle } from "@/utils/typography";
 
 export type ProfileSetupStep = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.notoNastaliqUrdu,
     fontSize: 11,
     lineHeight: 23,
+    ...androidNastaliqHeadingStyle(11, 23),
   },
   stepBadge: {
     alignItems: "center",

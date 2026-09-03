@@ -13,6 +13,7 @@ import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
+import { androidNastaliqHeadingStyle } from "@/utils/typography";
 
 type AuthShellProps = PropsWithChildren<{
   footer: ReactNode;
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.notoNastaliqUrdu,
     fontSize: 11,
     lineHeight: 23,
+    ...androidNastaliqHeadingStyle(11, 23),
   },
   content: {
     flexGrow: 1,

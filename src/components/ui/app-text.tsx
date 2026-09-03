@@ -1,6 +1,7 @@
-import { Text, type TextProps } from "react-native";
+import { StyleSheet, Text, type TextProps, type TextStyle } from "react-native";
 
 import { useLanguage } from "@/providers/language-provider";
+import { androidNastaliqTextStyle } from "@/utils/typography";
 
 type AppTextVariant = "body" | "label" | "title";
 
@@ -14,6 +15,8 @@ export function AppText({
   ...props
 }: AppTextProps) {
   const { fonts, isRTL, language, textAlign } = useLanguage();
+  const flattened = StyleSheet.flatten(style) as TextStyle | undefined;
+  const fontFamily = flattened?.fontFamily ?? fonts[variant];
 
   return (
     <Text
@@ -26,6 +29,16 @@ export function AppText({
           writingDirection: isRTL ? "rtl" : "ltr",
         },
         style,
+        androidNastaliqTextStyle(fontFamily, {
+          fontSize:
+            typeof flattened?.fontSize === "number"
+              ? flattened.fontSize
+              : undefined,
+          lineHeight:
+            typeof flattened?.lineHeight === "number"
+              ? flattened.lineHeight
+              : undefined,
+        }),
       ]}
     />
   );

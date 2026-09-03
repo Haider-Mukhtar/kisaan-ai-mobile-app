@@ -9,6 +9,7 @@ import {
   useLanguage,
   type LanguageCode,
 } from "@/providers/language-provider";
+import { androidNastaliqTextStyle } from "@/utils/typography";
 
 const options: {
   code: LanguageCode;
@@ -87,6 +88,10 @@ export default function LanguageOnboardingScreen() {
                     fontFamily: option.fontFamily,
                     writingDirection: option.direction,
                   },
+                  androidNastaliqTextStyle(option.fontFamily, {
+                    fontSize: 29,
+                    lineHeight: 48,
+                  }),
                 ]}
               >
                 {option.sample}
@@ -102,6 +107,10 @@ export default function LanguageOnboardingScreen() {
                     fontFamily: option.fontFamily,
                     writingDirection: option.direction,
                   },
+                  androidNastaliqTextStyle(option.fontFamily, {
+                    fontSize: 20,
+                    lineHeight: 34,
+                  }),
                 ]}
               >
                 {option.name}
