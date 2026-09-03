@@ -50,6 +50,14 @@ export default function TabsLayout() {
           <NativeTabs.Trigger.Label>{t("tabAi")}</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
 
+        <NativeTabs.Trigger name="mandi" disableAutomaticContentInsets>
+          <NativeTabs.Trigger.Icon
+            md={{ default: "monitoring", selected: "monitoring" }}
+            sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis" }}
+          />
+          <NativeTabs.Trigger.Label>{t("tabMandi")}</NativeTabs.Trigger.Label>
+        </NativeTabs.Trigger>
+
         <NativeTabs.Trigger name="profile" disableAutomaticContentInsets>
           <NativeTabs.Trigger.Icon
             md={{ default: "person", selected: "person" }}
@@ -63,7 +71,7 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  // Keep Home / AI / Profile in a fixed left-to-right order in Urdu.
+  // Keep the primary tabs in a fixed left-to-right order in Urdu.
   host: {
     direction: "ltr",
     flex: 1,
