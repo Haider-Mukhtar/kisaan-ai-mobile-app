@@ -191,6 +191,19 @@ function ThemedRootLayout() {
                 name="change-location"
                 options={{ animation: "slide_from_bottom", presentation: "modal" }}
               />
+              <Stack.Screen
+                name="mandi-rate/[id]"
+                options={{
+                  animation: "slide_from_bottom",
+                  contentStyle: { backgroundColor: colors.card },
+                  headerShown: false,
+                  presentation: "formSheet",
+                  sheetAllowedDetents: [0.70, 0.92],
+                  sheetCornerRadius: 28,
+                  sheetGrabberVisible: true,
+                  sheetInitialDetentIndex: 0,
+                }}
+              />
             </Stack.Protected>
           </Stack>
         )}

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { rememberMandiSnapshot } from "@/services/mandi/memory";
 import type { MandiSnapshot } from "@/services/mandi/types";
 
 const CACHE_KEY = "kisaan-ai-mandi-rates-v1";
@@ -21,13 +22,18 @@ export async function readCachedMandiRates(): Promise<MandiSnapshot | null> {
     if (!value) return null;
 
     const parsed: unknown = JSON.parse(value);
-    return isSnapshot(parsed) ? parsed : null;
+    if (!isSnapshot(parsed)) return null;
+
+    rememberMandiSnapshot(parsed);
+    return parsed;
   } catch {
     return null;
   }
 }
 
 export async function writeCachedMandiRates(snapshot: MandiSnapshot) {
+  rememberMandiSnapshot(snapshot);
+
   try {
     await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(snapshot));
   } catch {

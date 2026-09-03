@@ -1,5 +1,5 @@
 import { Ionicons } from "@react-native-vector-icons/ionicons";
-import { Image } from "expo-image";
+import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,42 +11,24 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-screens/experimental";
 
+import { MandiCropImage } from "@/components/mandi/crop-image";
+import {
+  formatPrice,
+  formatUnit,
+  getTrendAppearance,
+} from "@/components/mandi/format";
 import { AppText } from "@/components/ui/app-text";
 import { AppTextInput } from "@/components/ui/app-text-input";
 import useThemeManager from "@/hooks/use-theme-manager";
-import { useLanguage, type TranslationKey } from "@/providers/language-provider";
+import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import {
   readCachedMandiRates,
   writeCachedMandiRates,
 } from "@/services/mandi/device-cache";
 import { fetchMandiRates } from "@/services/mandi/fetch-mandi-rates";
-import {
-  MANDI_CITIES,
-  type MandiCity,
-  type MandiRate,
-  type MandiSnapshot,
-} from "@/services/mandi/types";
-
-const CITY_LABELS: Record<MandiCity, TranslationKey> = {
-  lahore: "mandiCityLahore",
-  karachi: "mandiCityKarachi",
-  multan: "mandiCityMultan",
-  islamabad: "mandiCityIslamabad",
-};
-
-const NUMBER_FORMATTER = new Intl.NumberFormat("en-PK", {
-  maximumFractionDigits: 1,
-});
-
-function formatNumber(value: number) {
-  return NUMBER_FORMATTER.format(value);
-}
-
-function formatUnit(unit: string) {
-  if (unit.toLowerCase() === "dozen") return "/dozen";
-  return `/${unit.toLowerCase()}`;
-}
+import { rememberMandiSnapshot } from "@/services/mandi/memory";
+import type { MandiRate, MandiSnapshot } from "@/services/mandi/types";
 
 export default function MandiScreen() {
   const { colors } = useThemeManager();
@@ -61,6 +43,7 @@ export default function MandiScreen() {
   const snapshotRef = useRef<MandiSnapshot | null>(null);
 
   const commitSnapshot = useCallback((next: MandiSnapshot) => {
+    rememberMandiSnapshot(next);
     snapshotRef.current = next;
     setSnapshot(next);
   }, []);
@@ -160,11 +143,58 @@ export default function MandiScreen() {
 
   return (
     <ScreenFrame>
+      <View style={[styles.header, { backgroundColor: colors.background }]}>
+        <View style={styles.titleRow}>
+          <View style={styles.headerCopy}>
+            <AppText variant="title" style={[styles.title, { color: colors.foreground }]}>
+              {t("mandiTitle")}
+            </AppText>
+            <AppText style={[styles.subtitle, { color: colors.mutedForeground }]}>
+              {t("mandiDescription")}
+            </AppText>
+          </View>
+          <View style={[styles.countPill, { backgroundColor: colors.primary }]}>
+            <AppText variant="label" style={{ color: colors.primaryForeground }}>
+              {t("mandiCropCount", { count: snapshot?.rates.length ?? 0 })}
+            </AppText>
+          </View>
+        </View>
+
+        {snapshot?.sourceUpdatedAt ? (
+          <View style={[styles.sourceRow, { backgroundColor: colors.muted }]}>
+            <Ionicons color={colors.primaryDark} name="checkmark-circle" size={17} />
+            <AppText selectable style={[styles.sourceText, { color: colors.mutedForeground }]}>
+              {snapshot.sourceUpdatedAt}
+            </AppText>
+          </View>
+        ) : null}
+
+        {showingSaved ? (
+          <AppText style={[styles.savedNotice, { color: colors.warning }]}>
+            {t("mandiSavedNotice")}
+          </AppText>
+        ) : null}
+
+        <AppTextInput
+          accessibilityLabel={t("mandiSearchPlaceholder")}
+          autoCapitalize="none"
+          autoCorrect={false}
+          onChangeText={setQuery}
+          placeholder={t("mandiSearchPlaceholder")}
+          returnKeyType="search"
+          value={query}
+        />
+      </View>
+
       <FlatList
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[
+          styles.listContent,
+          filteredRates.length === 0 && styles.listEmptyContent,
+        ]}
         contentInsetAdjustmentBehavior="automatic"
         data={filteredRates}
         keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         keyExtractor={(item) => item.id}
         ListEmptyComponent={
           <View style={styles.emptySearch}>
@@ -172,50 +202,6 @@ export default function MandiScreen() {
             <AppText variant="label" style={{ color: colors.foreground }}>
               {t("mandiNoResults")}
             </AppText>
-          </View>
-        }
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <View style={styles.titleRow}>
-              <View style={styles.headerCopy}>
-                <AppText variant="title" style={[styles.title, { color: colors.foreground }]}>
-                  {t("mandiTitle")}
-                </AppText>
-                <AppText style={[styles.subtitle, { color: colors.mutedForeground }]}>
-                  {t("mandiDescription")}
-                </AppText>
-              </View>
-              <View style={[styles.countPill, { backgroundColor: colors.primary }]}>
-                <AppText variant="label" style={{ color: colors.primaryForeground }}>
-                  {t("mandiCropCount", { count: snapshot?.rates.length ?? 0 })}
-                </AppText>
-              </View>
-            </View>
-
-            {snapshot?.sourceUpdatedAt ? (
-              <View style={[styles.sourceRow, { backgroundColor: colors.muted }]}>
-                <Ionicons color={colors.primaryDark} name="checkmark-circle" size={17} />
-                <AppText selectable style={[styles.sourceText, { color: colors.mutedForeground }]}>
-                  {snapshot.sourceUpdatedAt}
-                </AppText>
-              </View>
-            ) : null}
-
-            {showingSaved ? (
-              <AppText style={[styles.savedNotice, { color: colors.warning }]}>
-                {t("mandiSavedNotice")}
-              </AppText>
-            ) : null}
-
-            <AppTextInput
-              accessibilityLabel={t("mandiSearchPlaceholder")}
-              autoCapitalize="none"
-              autoCorrect={false}
-              onChangeText={setQuery}
-              placeholder={t("mandiSearchPlaceholder")}
-              returnKeyType="search"
-              value={query}
-            />
           </View>
         }
         refreshControl={
@@ -228,6 +214,7 @@ export default function MandiScreen() {
         }
         renderItem={({ item }) => <MandiRateCard rate={item} />}
         showsVerticalScrollIndicator={false}
+        style={styles.list}
       />
     </ScreenFrame>
   );
@@ -249,31 +236,34 @@ function ScreenFrame({ children }: { children: React.ReactNode }) {
 
 function MandiRateCard({ rate }: { rate: MandiRate }) {
   const { colors } = useThemeManager();
-  const { t } = useLanguage();
-  const isUp = rate.change > 0;
-  const isDown = rate.change < 0;
-  const trendColor = isUp ? colors.success : isDown ? colors.red : colors.mutedForeground;
+  const { isRTL, t } = useLanguage();
+  const trend = getTrendAppearance(rate.change, colors);
+
+  const openDetails = () => {
+    router.push({
+      pathname: "/mandi-rate/[id]",
+      params: { id: rate.id },
+    });
+  };
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
+    <Pressable
+      accessibilityHint={t("mandiOpenCrop", { name: rate.name })}
+      accessibilityLabel={rate.urdu ? `${rate.name}, ${rate.urdu}` : rate.name}
+      accessibilityRole="button"
+      onPress={openDetails}
+      style={({ pressed }) => [
+        styles.card,
+        { backgroundColor: colors.card, borderColor: colors.border },
+        pressed && styles.cardPressed,
+      ]}
+    >
       <View style={styles.cardHeader}>
-        <View style={[styles.imageFrame, { backgroundColor: colors.muted }]}>
-          {rate.imageUrl ? (
-            <Image
-              accessibilityLabel={rate.name}
-              contentFit="cover"
-              source={{ uri: rate.imageUrl }}
-              style={styles.cropImage}
-              transition={150}
-            />
-          ) : (
-            <AppText style={styles.imageFallback}>🌾</AppText>
-          )}
-        </View>
+        <MandiCropImage name={rate.name} size={56} uri={rate.imageUrl} />
 
         <View style={styles.cropNames}>
           <AppText
-            selectable
+            numberOfLines={2}
             variant="label"
             style={[styles.cropName, styles.ltrText, { color: colors.foreground }]}
           >
@@ -281,7 +271,7 @@ function MandiRateCard({ rate }: { rate: MandiRate }) {
           </AppText>
           {rate.urdu ? (
             <AppText
-              selectable
+              numberOfLines={1}
               style={[styles.urduName, styles.rtlText, { color: colors.mutedForeground }]}
             >
               {rate.urdu}
@@ -290,44 +280,33 @@ function MandiRateCard({ rate }: { rate: MandiRate }) {
         </View>
 
         <View style={styles.priceBlock}>
-          <AppText selectable variant="label" style={[styles.average, styles.ltrText, { color: colors.foreground }]}>
-            {`Rs ${formatNumber(rate.average)}`}
+          <AppText variant="label" style={[styles.average, styles.ltrText, { color: colors.foreground }]}>
+            {formatPrice(rate.average, t)}
           </AppText>
           <AppText style={[styles.unit, styles.ltrText, { color: colors.mutedForeground }]}>
-            {formatUnit(rate.unit)}
+            {formatUnit(rate.unit, t)}
           </AppText>
-          <AppText variant="label" style={[styles.trend, styles.ltrText, { color: trendColor }]}>
-            {isUp ? "▲ " : isDown ? "▼ " : "— "}
-            {`${rate.change > 0 ? "+" : ""}${formatNumber(rate.change)}%`}
+          <AppText variant="label" style={[styles.trend, styles.ltrText, { color: trend.color }]}>
+            {`${trend.marker} ${trend.text}`}
           </AppText>
         </View>
-      </View>
 
-      <View style={[styles.cityList, { borderTopColor: colors.border }]}>
-        {MANDI_CITIES.map((city) => {
-          const cityRate = rate.cityRates[city];
-          if (!cityRate) return null;
-
-          return (
-            <View key={city} style={styles.cityRow}>
-              <AppText style={[styles.cityName, { color: colors.mutedForeground }]}>
-                {t(CITY_LABELS[city])}
-              </AppText>
-              <AppText selectable variant="label" style={[styles.cityPrice, styles.ltrText, { color: colors.foreground }]}>
-                {`Rs ${formatNumber(cityRate.min)}–${formatNumber(cityRate.max)} ${formatUnit(rate.unit)}`}
-              </AppText>
-            </View>
-          );
-        })}
+        <Ionicons
+          color={colors.mutedForeground}
+          name={isRTL ? "chevron-back" : "chevron-forward"}
+          size={18}
+        />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  listContent: { gap: 12, paddingBottom: 32, paddingHorizontal: 16 },
-  header: { gap: 14, paddingBottom: 4, paddingTop: 12 },
+  header: { gap: 14, paddingBottom: 12, paddingHorizontal: 16, paddingTop: 12 },
+  list: { flex: 1 },
+  listContent: { gap: 12, paddingBottom: 32, paddingHorizontal: 16, paddingTop: 4 },
+  listEmptyContent: { flexGrow: 1 },
   titleRow: { alignItems: "center", flexDirection: "row", gap: 12 },
   headerCopy: { flex: 1 },
   title: { fontSize: 26, lineHeight: 42 },
@@ -336,11 +315,9 @@ const styles = StyleSheet.create({
   sourceRow: { alignItems: "center", borderRadius: 14, flexDirection: "row", gap: 7, paddingHorizontal: 12, paddingVertical: 9 },
   sourceText: { flex: 1, fontSize: 12, lineHeight: 20 },
   savedNotice: { fontSize: 13, lineHeight: 21 },
-  card: { borderRadius: 20, borderWidth: 1, direction: "ltr", padding: 14 },
+  card: { borderRadius: 20, borderWidth: 1, padding: 14 },
+  cardPressed: { opacity: 0.82 },
   cardHeader: { alignItems: "center", flexDirection: "row", gap: 11 },
-  imageFrame: { alignItems: "center", borderRadius: 15, height: 56, justifyContent: "center", overflow: "hidden", width: 56 },
-  cropImage: { height: "100%", width: "100%" },
-  imageFallback: { fontSize: 25 },
   cropNames: { flex: 1, minWidth: 0 },
   cropName: { fontSize: 15, lineHeight: 22 },
   urduName: { fontSize: 14, lineHeight: 24 },
@@ -348,10 +325,6 @@ const styles = StyleSheet.create({
   average: { fontSize: 16, lineHeight: 23 },
   unit: { fontSize: 11, lineHeight: 16 },
   trend: { fontSize: 12, lineHeight: 18, marginTop: 2 },
-  cityList: { borderTopWidth: StyleSheet.hairlineWidth, gap: 7, marginTop: 12, paddingTop: 11 },
-  cityRow: { alignItems: "center", flexDirection: "row", gap: 12 },
-  cityName: { flex: 1, fontSize: 12, lineHeight: 19 },
-  cityPrice: { fontSize: 12, lineHeight: 19 },
   ltrText: { textAlign: "left", writingDirection: "ltr" },
   rtlText: { textAlign: "left", writingDirection: "rtl" },
   centerState: { alignItems: "center", flex: 1, gap: 10, justifyContent: "center", paddingHorizontal: 32 },
@@ -359,6 +332,6 @@ const styles = StyleSheet.create({
   stateTitle: { fontSize: 21, lineHeight: 34, textAlign: "center" },
   stateBody: { fontSize: 14, lineHeight: 23, textAlign: "center" },
   retryButton: { borderRadius: 16, marginTop: 8, paddingHorizontal: 18, paddingVertical: 12 },
-  emptySearch: { alignItems: "center", gap: 8, paddingVertical: 48 },
+  emptySearch: { alignItems: "center", flexGrow: 1, gap: 8, justifyContent: "center", paddingVertical: 48 },
   pressed: { opacity: 0.65 },
 });
