@@ -34,7 +34,7 @@ export default function TabsLayout() {
         rippleColor={colors.accent}
         tintColor={selectedColor}
       >
-        <NativeTabs.Trigger name="index" disableAutomaticContentInsets>
+        <NativeTabs.Trigger name="index">
           <NativeTabs.Trigger.Icon
             md={{ default: "home", selected: "home" }}
             sf={{ default: "house", selected: "house.fill" }}
@@ -50,7 +50,7 @@ export default function TabsLayout() {
           <NativeTabs.Trigger.Label>{t("tabAi")}</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
 
-        <NativeTabs.Trigger name="mandi" disableAutomaticContentInsets>
+        <NativeTabs.Trigger name="mandi">
           <NativeTabs.Trigger.Icon
             md={{ default: "monitoring", selected: "monitoring" }}
             sf={{ default: "chart.line.uptrend.xyaxis", selected: "chart.line.uptrend.xyaxis" }}
@@ -58,7 +58,7 @@ export default function TabsLayout() {
           <NativeTabs.Trigger.Label>{t("tabMandi")}</NativeTabs.Trigger.Label>
         </NativeTabs.Trigger>
 
-        <NativeTabs.Trigger name="profile" disableAutomaticContentInsets>
+        <NativeTabs.Trigger name="profile">
           <NativeTabs.Trigger.Icon
             md={{ default: "person", selected: "person" }}
             sf={{ default: "person", selected: "person.fill" }}

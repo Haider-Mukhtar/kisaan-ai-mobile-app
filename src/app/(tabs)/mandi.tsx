@@ -226,7 +226,8 @@ function ScreenFrame({ children }: { children: React.ReactNode }) {
 
   return (
     <SafeAreaView
-      edges={{ bottom: true, top: !isOffline }}
+      collapsable={false}
+      edges={{ top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       {children}

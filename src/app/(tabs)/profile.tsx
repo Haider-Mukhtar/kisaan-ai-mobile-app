@@ -73,10 +73,12 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView
-      edges={{ bottom: true, top: !isOffline }}
+      collapsable={false}
+      edges={{ top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
       <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
