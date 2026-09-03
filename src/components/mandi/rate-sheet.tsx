@@ -424,6 +424,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
+    paddingBottom: 8,
     paddingHorizontal: 16,
     paddingTop: Platform.OS === "ios" ? 10 : 14,
   },
@@ -444,7 +445,7 @@ const styles = StyleSheet.create({
   content: {
     gap: 16,
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: Platform.OS === "ios" ? 64 : 16,
   },
   cropRow: {
     alignItems: "center",
