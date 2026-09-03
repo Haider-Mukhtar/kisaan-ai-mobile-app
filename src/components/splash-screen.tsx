@@ -21,15 +21,15 @@ export default function SplashScreen() {
     >
       <View pointerEvents="none" style={styles.overlay} />
 
-      <View style={styles.brandContainer}>
+      {/* <View style={styles.brandContainer}>
         <AppText variant="title" style={styles.appName}>
           {t("appName")}
         </AppText>
-      </View>
+      </View> */}
 
-      <View style={styles.loadingContainer}>
+      {/* <View style={styles.loadingContainer}>
         <ActivityIndicator color="#FFFFFF" size="large" />
-      </View>
+      </View> */}
     </ImageBackground>
   );
 }

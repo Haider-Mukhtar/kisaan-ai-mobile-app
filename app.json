@@ -23,8 +23,8 @@
       "softwareKeyboardLayoutMode": "resize",
       "icon": "./assets/images/icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#FFFFFF",
-        "foregroundImage": "./assets/images/icon.png"
+        "backgroundColor": "#0D6F34",
+        "foregroundImage": "./assets/images/adaptive-icon.png"
       },
       "permissions": [
         "android.permission.CAMERA",
@@ -44,8 +44,8 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#061510",
-          "image": "./assets/images/splash-icon.png"
+          "backgroundColor": "#0D6F34",
+          "image": "./assets/images/adaptive-icon.png"
         }
       ],
       [
