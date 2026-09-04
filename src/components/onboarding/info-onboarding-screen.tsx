@@ -11,9 +11,9 @@ import { androidNastaliqHeadingStyle } from "@/utils/typography";
 type Artwork = "companion" | "diagnosis" | "decisions";
 
 const artworkSources = {
-  companion: require("../../../assets/images/onboarding-farming-companion.png"),
-  decisions: require("../../../assets/images/onboarding-farm-decisions.png"),
-  diagnosis: require("../../../assets/images/onboarding-crop-diagnosis.png"),
+  companion: require("../../../assets/images/onboarding-farming-companion-realistic.png"),
+  decisions: require("../../../assets/images/onboarding-farm-decisions-realistic.png"),
+  diagnosis: require("../../../assets/images/onboarding-crop-diagnosis-realistic.png"),
 } as const;
 
 const artworkDescriptions: Record<Artwork, string> = {
