@@ -17,6 +17,7 @@ import { NotoNaskhArabic_400Regular } from "@expo-google-fonts/noto-naskh-arabic
 import { NotoNastaliqUrdu_400Regular } from "@expo-google-fonts/noto-nastaliq-urdu";
 import { NotoSansArabic_600SemiBold } from "@expo-google-fonts/noto-sans-arabic";
 import Toast from "react-native-toast-message";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 import { NetworkBanner } from "@/components/network-banner";
 import AppSplashScreen from "@/components/splash-screen";
@@ -38,6 +39,12 @@ import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { WeatherProvider } from "@/providers/weather-provider";
 
+const SPLASH_FADE_DURATION = 300;
+
+SplashScreen.setOptions({
+  duration: SPLASH_FADE_DURATION,
+  fade: true,
+});
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 export default function RootLayout() {
@@ -155,58 +162,72 @@ function ThemedRootLayout() {
     <NavigationThemeProvider value={navigationTheme}>
       <View style={[styles.app, { direction }]}>
         {!showSplash && isOffline ? <NetworkBanner /> : null}
-        {showSplash ? (
-          <AppSplashScreen />
-        ) : (
-          <Stack
-            screenOptions={{
-              contentStyle: { backgroundColor: colors.background },
-              headerShown: false,
-              headerStyle: { backgroundColor: colors.card },
-              headerTintColor: colors.foreground,
-              headerTitleStyle: { fontFamily: fonts.label },
-            }}
+        {!showSplash ? (
+          <Animated.View
+            entering={FadeIn.duration(SPLASH_FADE_DURATION)}
+            style={styles.screen}
           >
-            <Stack.Protected guard={showIntroOnboarding}>
-              <Stack.Screen name="(onboarding)" />
-            </Stack.Protected>
-            <Stack.Protected guard={showLogin}>
-              <Stack.Screen name="(auth)" />
-            </Stack.Protected>
-            <Stack.Protected guard={showProfileSetup}>
-              <Stack.Screen name="(profile-setup)" />
-            </Stack.Protected>
-            <Stack.Protected guard={showHome}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen
-                name="edit-profile"
-                options={{
-                  animation: "slide_from_bottom",
-                  headerShown: true,
-                  presentation: "modal",
-                  title: t("editProfileTitle"),
-                }}
-              />
-              <Stack.Screen
-                name="change-location"
-                options={{ animation: "slide_from_bottom", presentation: "modal" }}
-              />
-              <Stack.Screen
-                name="mandi-rate/[id]"
-                options={{
-                  animation: "slide_from_bottom",
-                  contentStyle: { backgroundColor: colors.card },
-                  headerShown: false,
-                  presentation: "formSheet",
-                  sheetAllowedDetents: [0.70, 0.92],
-                  sheetCornerRadius: 28,
-                  sheetGrabberVisible: true,
-                  sheetInitialDetentIndex: 0,
-                }}
-              />
-            </Stack.Protected>
-          </Stack>
-        )}
+            <Stack
+              screenOptions={{
+                contentStyle: { backgroundColor: colors.background },
+                headerShown: false,
+                headerStyle: { backgroundColor: colors.card },
+                headerTintColor: colors.foreground,
+                headerTitleStyle: { fontFamily: fonts.label },
+              }}
+            >
+              <Stack.Protected guard={showIntroOnboarding}>
+                <Stack.Screen name="(onboarding)" />
+              </Stack.Protected>
+              <Stack.Protected guard={showLogin}>
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+              <Stack.Protected guard={showProfileSetup}>
+                <Stack.Screen name="(profile-setup)" />
+              </Stack.Protected>
+              <Stack.Protected guard={showHome}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen
+                  name="edit-profile"
+                  options={{
+                    animation: "slide_from_bottom",
+                    headerShown: true,
+                    presentation: "modal",
+                    title: t("editProfileTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="change-location"
+                  options={{
+                    animation: "slide_from_bottom",
+                    presentation: "modal",
+                  }}
+                />
+                <Stack.Screen
+                  name="mandi-rate/[id]"
+                  options={{
+                    animation: "slide_from_bottom",
+                    contentStyle: { backgroundColor: colors.card },
+                    headerShown: false,
+                    presentation: "formSheet",
+                    sheetAllowedDetents: [0.70, 0.92],
+                    sheetCornerRadius: 28,
+                    sheetGrabberVisible: true,
+                    sheetInitialDetentIndex: 0,
+                  }}
+                />
+              </Stack.Protected>
+            </Stack>
+          </Animated.View>
+        ) : null}
+        {showSplash ? (
+          <Animated.View
+            exiting={FadeOut.duration(SPLASH_FADE_DURATION)}
+            style={styles.splash}
+          >
+            <AppSplashScreen />
+          </Animated.View>
+        ) : null}
       </View>
       <StatusBar style={showSplash || isDarkMode || isOffline ? "light" : "dark"} />
     </NavigationThemeProvider>
@@ -216,5 +237,16 @@ function ThemedRootLayout() {
 const styles = StyleSheet.create({
   app: {
     flex: 1,
+  },
+  screen: {
+    flex: 1,
+  },
+  splash: {
+    bottom: 0,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    zIndex: 1,
   },
 });
