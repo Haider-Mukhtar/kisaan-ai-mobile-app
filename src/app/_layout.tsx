@@ -204,6 +204,14 @@ function ThemedRootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="weather-details"
+                  options={{
+                    headerBackTitle: t("tabHome"),
+                    headerShown: true,
+                    title: t("weatherDetailsTitle"),
+                  }}
+                />
+                <Stack.Screen
                   name="mandi-rate/[id]"
                   options={{
                     animation: "slide_from_bottom",

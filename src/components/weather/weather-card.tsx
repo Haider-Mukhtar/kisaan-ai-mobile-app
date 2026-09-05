@@ -22,6 +22,10 @@ import { isSnapshotFresh, snapshotAgeMs } from "@/services/weather/types";
 import { describeWeatherCode } from "@/services/weather/weather-codes";
 import type { LocationSource } from "@/services/supabase/profiles";
 
+type WeatherCardProps = {
+  variant?: "detail" | "summary";
+};
+
 const SOURCE_LABEL_KEYS: Record<LocationSource, TranslationKey> = {
   gps: "locationSourceGps",
   manual: "locationSourceManual",
@@ -33,9 +37,9 @@ const SOURCE_LABEL_KEYS: Record<LocationSource, TranslationKey> = {
  * no location yet, loading, failed, or showing something saved from earlier —
  * so a farmer always sees an explanation and a way forward.
  */
-export function WeatherCard() {
+export function WeatherCard({ variant = "detail" }: WeatherCardProps) {
   const { colors } = useThemeManager();
-  const { language, t } = useLanguage();
+  const { isRTL, language, t } = useLanguage();
   const { profile } = useProfile();
   const { error, isRefreshing, refresh, snapshot, status } = useWeather();
 
@@ -178,6 +182,138 @@ export function WeatherCard() {
     });
   }
 
+  const summaryDetails = details.map((detail) =>
+    detail.key === "rain" && today.precipitationChance !== null
+      ? {
+          ...detail,
+          value: t("weatherPercent", { value: today.precipitationChance }),
+        }
+      : detail,
+  );
+
+  if (variant === "summary") {
+    return (
+      <Card>
+        {header}
+
+        <View style={styles.summaryHero}>
+          <View style={styles.summaryCondition}>
+            <AppText style={styles.summaryEmoji}>{condition.emoji}</AppText>
+            <View style={styles.summaryConditionCopy}>
+              <AppText
+                style={[styles.summaryTemp, { color: colors.foreground }]}
+              >
+                {formatTemperature(heroTemp)}
+              </AppText>
+              <AppText
+                variant="label"
+                style={[styles.summaryConditionLabel, { color: colors.foreground }]}
+              >
+                {t(condition.labelKey)}
+              </AppText>
+            </View>
+          </View>
+
+          <View
+            style={[styles.summaryRange, { backgroundColor: colors.input }]}
+          >
+            <AppText
+              style={[
+                styles.summaryRangeLabel,
+                { color: colors.mutedForeground },
+              ]}
+            >
+              {t("weatherHigh")}
+            </AppText>
+            <AppText
+              variant="label"
+              style={[styles.summaryRangeValue, { color: colors.foreground }]}
+            >
+              {formatTemperature(today.tempMaxC)}
+            </AppText>
+            <View style={[styles.summaryRangeDivider, { backgroundColor: colors.border }]} />
+            <AppText
+              style={[
+                styles.summaryRangeLabel,
+                { color: colors.mutedForeground },
+              ]}
+            >
+              {t("weatherLow")}
+            </AppText>
+            <AppText
+              variant="label"
+              style={[styles.summaryRangeValue, { color: colors.foreground }]}
+            >
+              {formatTemperature(today.tempMinC)}
+            </AppText>
+          </View>
+        </View>
+
+        {summaryDetails.length > 0 ? (
+          <View style={styles.summaryDetails}>
+            {summaryDetails.map((detail) => (
+              <View key={detail.key} style={styles.summaryDetail}>
+                <AppText
+                  style={[
+                    styles.detailLabel,
+                    { color: colors.mutedForeground },
+                  ]}
+                >
+                  {detail.label}
+                </AppText>
+                <AppText
+                  numberOfLines={1}
+                  variant="label"
+                  style={[styles.summaryDetailValue, { color: colors.foreground }]}
+                >
+                  {detail.value}
+                </AppText>
+              </View>
+            ))}
+          </View>
+        ) : null}
+
+        {isStale ? (
+          <AppText
+            style={[styles.savedNotice, { color: colors.warning }]}
+          >
+            {t("weatherSavedNotice")}
+          </AppText>
+        ) : null}
+
+        <View
+          style={[styles.summaryFooter, { borderTopColor: colors.border }]}
+        >
+          <AppText
+            style={[styles.updated, { color: colors.mutedForeground }]}
+          >
+            {t(age.key, { count: age.count })}
+          </AppText>
+          <Pressable
+            accessibilityHint={t("weatherDetailsHint")}
+            accessibilityRole="button"
+            onPress={() => router.push("/weather-details")}
+            style={({ pressed }) => [
+              styles.detailsButton,
+              { backgroundColor: colors.primary },
+              pressed && styles.pressed,
+            ]}
+          >
+            <AppText
+              variant="label"
+              style={[
+                styles.detailsButtonText,
+                { color: colors.primaryForeground },
+              ]}
+            >
+              {`${t("weatherDetailsAction")}  ${isRTL ? "←" : "→"}`}
+            </AppText>
+          </Pressable>
+        </View>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       {header}
@@ -309,6 +445,85 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     marginTop: 18,
+  },
+  summaryHero: {
+    gap: 14,
+    marginTop: 18,
+  },
+  summaryCondition: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  summaryEmoji: {
+    fontSize: 52,
+    lineHeight: 64,
+    marginEnd: 14,
+  },
+  summaryConditionCopy: {
+    flex: 1,
+  },
+  summaryTemp: {
+    fontFamily: Fonts.interSemiBold,
+    fontSize: 42,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 50,
+  },
+  summaryConditionLabel: {
+    fontSize: 15,
+    lineHeight: 26,
+  },
+  summaryRange: {
+    alignItems: "center",
+    borderRadius: 16,
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  summaryRangeLabel: {
+    fontSize: 12,
+    lineHeight: 20,
+  },
+  summaryRangeValue: {
+    fontSize: 15,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 24,
+    marginStart: 6,
+  },
+  summaryRangeDivider: {
+    height: 22,
+    marginHorizontal: 12,
+    width: StyleSheet.hairlineWidth,
+  },
+  summaryDetails: {
+    flexDirection: "row",
+    marginTop: 18,
+  },
+  summaryDetail: {
+    flex: 1,
+    minWidth: 0,
+    paddingEnd: 8,
+  },
+  summaryDetailValue: {
+    fontSize: 14,
+    fontVariant: ["tabular-nums"],
+    lineHeight: 24,
+  },
+  summaryFooter: {
+    alignItems: "center",
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    marginTop: 18,
+    paddingTop: 14,
+  },
+  detailsButton: {
+    borderRadius: 14,
+    marginStart: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  detailsButtonText: {
+    fontSize: 13,
+    lineHeight: 22,
   },
   heroEmoji: {
     fontSize: 60,

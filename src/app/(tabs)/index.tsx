@@ -57,7 +57,7 @@ export default function HomeScreen() {
         </AppText>
 
         <View style={styles.weather}>
-          <WeatherCard />
+          <WeatherCard variant="summary" />
         </View>
       </ScrollView>
     </SafeAreaView>
