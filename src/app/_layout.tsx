@@ -195,6 +195,15 @@ function ThemedRootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="offline-advisor"
+                  options={{
+                    animation: "slide_from_right",
+                    headerBackTitle: t("back"),
+                    headerShown: true,
+                    title: t("offlineTitle"),
+                  }}
+                />
+                <Stack.Screen
                   name="weather-details"
                   options={{
                     headerBackTitle: t("tabHome"),
