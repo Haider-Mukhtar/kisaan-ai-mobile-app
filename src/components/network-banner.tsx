@@ -3,12 +3,15 @@ import { Ionicons } from "@react-native-vector-icons/ionicons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AppText } from "@/components/ui/app-text";
-import { Colors } from "@/constants/theme";
+import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 
+const LABEL_COLOR = "#FFFFFF";
+
 export function NetworkBanner() {
   const insets = useSafeAreaInsets();
+  const { colors } = useThemeManager();
   const { t } = useLanguage();
   const { isOffline } = useNetwork();
 
@@ -18,27 +21,22 @@ export function NetworkBanner() {
 
   return (
     <View
+      accessibilityHint={t("networkOfflineDescription")}
+      accessibilityLabel={t("networkOfflineTitle")}
       accessibilityLiveRegion="polite"
       accessibilityRole="alert"
       style={[
         styles.bar,
         {
-          backgroundColor: Colors.light.warning,
-          paddingTop: insets.top + 8,
+          backgroundColor: colors.warning,
+          paddingTop: insets.top,
         },
       ]}
     >
-      <Ionicons
-        color={Colors.light.background}
-        name="cloud-offline-outline"
-        size={18}
-      />
-      <View style={styles.copy}>
-        <AppText variant="label" style={styles.title}>
+      <View style={styles.content}>
+        <Ionicons color={LABEL_COLOR} name="cloud-offline-outline" size={14} />
+        <AppText numberOfLines={1} variant="label" style={styles.title}>
           {t("networkOfflineTitle")}
-        </AppText>
-        <AppText style={styles.description}>
-          {t("networkOfflineDescription")}
         </AppText>
       </View>
     </View>
@@ -47,26 +45,21 @@ export function NetworkBanner() {
 
 const styles = StyleSheet.create({
   bar: {
+    flexShrink: 0,
+  },
+  content: {
     alignItems: "center",
     flexDirection: "row",
-    flexShrink: 0,
-    gap: 10,
-    paddingBottom: 10,
+    gap: 6,
+    justifyContent: "center",
+    paddingBottom: 6,
     paddingHorizontal: 16,
-  },
-  copy: {
-    flex: 1,
-    gap: 1,
+    paddingTop: 4,
   },
   title: {
-    color: Colors.light.background,
-    fontSize: 13,
-    lineHeight: 20,
-  },
-  description: {
-    color: Colors.light.background,
+    color: LABEL_COLOR,
+    flexShrink: 1,
     fontSize: 12,
-    lineHeight: 18,
-    opacity: 0.92,
+    lineHeight: 16,
   },
 });
