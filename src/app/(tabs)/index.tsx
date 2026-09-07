@@ -2,6 +2,7 @@ import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-screens/experimental";
 
 import { AppText } from "@/components/ui/app-text";
+import { HomeAlerts } from "@/components/alerts/home-alerts";
 import { WeatherCard } from "@/components/weather/weather-card";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
@@ -56,6 +57,10 @@ export default function HomeScreen() {
           {t("homeSubtitle")}
         </AppText>
 
+        <View style={styles.alerts}>
+          <HomeAlerts />
+        </View>
+
         <View style={styles.weather}>
           <WeatherCard variant="summary" />
         </View>
@@ -74,5 +79,6 @@ const styles = StyleSheet.create({
   appName: { fontSize: 14, lineHeight: 26 },
   greeting: { fontSize: 26, lineHeight: 44 },
   subtitle: { fontSize: 14, lineHeight: 25, marginTop: 2 },
+  alerts: { marginTop: 22 },
   weather: { marginTop: 20 },
 });

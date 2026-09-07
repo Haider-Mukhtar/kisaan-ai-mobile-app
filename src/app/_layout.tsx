@@ -38,6 +38,7 @@ import { PhoneAuthProvider } from "@/providers/phone-auth-provider";
 import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { WeatherProvider } from "@/providers/weather-provider";
+import { AlertsProvider } from "@/providers/alerts-provider";
 
 const SPLASH_FADE_DURATION = 300;
 
@@ -81,7 +82,9 @@ export default function RootLayout() {
                   <PhoneAuthProvider>
                     <OnboardingProvider>
                       <WeatherProvider>
-                        <ThemedRootLayout />
+                        <AlertsProvider>
+                          <ThemedRootLayout />
+                        </AlertsProvider>
                       </WeatherProvider>
                     </OnboardingProvider>
                   </PhoneAuthProvider>
@@ -209,6 +212,22 @@ function ThemedRootLayout() {
                     headerBackTitle: t("tabHome"),
                     headerShown: true,
                     title: t("weatherDetailsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="alerts"
+                  options={{
+                    headerBackTitle: t("tabHome"),
+                    headerShown: true,
+                    title: t("alertsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="alert/[id]"
+                  options={{
+                    headerBackTitle: t("alertsTitle"),
+                    headerShown: true,
+                    title: t("alertDetailsTitle"),
                   }}
                 />
                 <Stack.Screen
