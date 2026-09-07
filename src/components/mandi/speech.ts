@@ -1,8 +1,8 @@
-import * as Speech from "expo-speech";
-
 import { CITY_LABELS } from "@/components/mandi/format";
 import type { LanguageCode, TranslationKey } from "@/providers/language-provider";
 import { MANDI_CITIES, type MandiRate } from "@/services/mandi/types";
+
+export { pickSpeechVoice, SPEECH_LANGUAGE } from "@/services/speech";
 
 type Translate = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
@@ -10,11 +10,6 @@ const NUMBER_FORMATTER = new Intl.NumberFormat("en-PK", {
   maximumFractionDigits: 1,
   useGrouping: false,
 });
-
-export const SPEECH_LANGUAGE: Record<LanguageCode, string> = {
-  en: "en-PK",
-  ur: "ur-PK",
-};
 
 export function formatSpokenNumber(value: number) {
   return NUMBER_FORMATTER.format(value);
@@ -88,35 +83,4 @@ export function buildMandiSpeechText(
   }
 
   return parts.join(" ");
-}
-
-export async function pickSpeechVoice(language: LanguageCode) {
-  try {
-    const voices = await Speech.getAvailableVoicesAsync();
-    const ranked = voices
-      .map((voice) => ({ voice, score: scoreVoice(voice.language, voice.quality, language) }))
-      .filter((entry) => entry.score > 0)
-      .sort((left, right) => right.score - left.score);
-
-    return ranked[0]?.voice ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function scoreVoice(voiceLanguage: string, quality: string, language: LanguageCode) {
-  const normalized = voiceLanguage.replaceAll("_", "-").toLowerCase();
-  const enhanced = quality === Speech.VoiceQuality.Enhanced ? 1 : 0;
-
-  if (language === "ur") {
-    if (normalized.startsWith("ur-pk") || normalized === "ur") return 4 + enhanced;
-    if (normalized.startsWith("ur")) return 2 + enhanced;
-    return 0;
-  }
-
-  if (normalized.startsWith("en-pk")) return 5 + enhanced;
-  if (normalized.startsWith("en-in")) return 4 + enhanced;
-  if (normalized.startsWith("en-gb") || normalized.startsWith("en-us")) return 3 + enhanced;
-  if (normalized.startsWith("en")) return 2 + enhanced;
-  return 0;
 }

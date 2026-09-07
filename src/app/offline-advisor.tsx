@@ -36,6 +36,7 @@ import {
 import { AppText } from "@/components/ui/app-text";
 import { useOfflineLlm } from "@/hooks/use-offline-llm";
 import { useOfflineModelStatus } from "@/hooks/use-offline-model-status";
+import { useSpeechPlayback } from "@/hooks/use-speech-playback";
 import useThemeManager from "@/hooks/use-theme-manager";
 import {
   useLanguage,
@@ -198,6 +199,8 @@ function OfflineAdvisorEngine({
     phase,
     sendMessage,
   } = useOfflineLlm({ farmerContext, isModelCached, language });
+  const { speakingId, stop: stopSpeech, toggle: toggleSpeech } =
+    useSpeechPlayback();
 
   useLayoutEffect(() => {
     generatingRef.current = isGenerating;
@@ -206,9 +209,16 @@ function OfflineAdvisorEngine({
   const confirmClear = useCallback(() => {
     Alert.alert(t("aiClearChat"), t("offlineClearConfirm"), [
       { style: "cancel", text: t("aiCancel") },
-      { onPress: clearMessages, style: "destructive", text: t("aiClearChat") },
+      {
+        onPress: () => {
+          void stopSpeech();
+          clearMessages();
+        },
+        style: "destructive",
+        text: t("aiClearChat"),
+      },
     ]);
-  }, [clearMessages, t]);
+  }, [clearMessages, stopSpeech, t]);
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -229,10 +239,33 @@ function OfflineAdvisorEngine({
   const handleSend = useCallback(
     (text: string) => {
       isNearBottomRef.current = true;
+      void stopSpeech();
       void sendMessage(text);
     },
-    [sendMessage],
+    [sendMessage, stopSpeech],
   );
+
+  const handleSpeakPress = useCallback(
+    (message: OfflineChatMessage) => {
+      void toggleSpeech(message.id, message.text);
+    },
+    [toggleSpeech],
+  );
+
+  useEffect(() => {
+    if (
+      speakingId &&
+      !messages.some(
+        (message) =>
+          message.id === speakingId &&
+          message.role === "model" &&
+          !message.isStreaming &&
+          message.text.trim(),
+      )
+    ) {
+      void stopSpeech();
+    }
+  }, [messages, speakingId, stopSpeech]);
 
   useEffect(() => {
     const show = KeyboardEvents.addListener("keyboardDidShow", () => {
@@ -412,6 +445,7 @@ function OfflineAdvisorEngine({
               messages.length === 0 && styles.emptyMessages,
             ]}
             data={messages}
+            extraData={speakingId}
             keyExtractor={(message) => message.id}
             keyboardDismissMode="interactive"
             keyboardShouldPersistTaps="handled"
@@ -423,7 +457,17 @@ function OfflineAdvisorEngine({
             }
             onScroll={handleScroll}
             ref={listRef}
-            renderItem={({ item }) => <AiChatBubble message={item} />}
+            renderItem={({ item }) => (
+              <AiChatBubble
+                isSpeaking={speakingId === item.id}
+                message={item}
+                onSpeakPress={
+                  item.role === "model"
+                    ? () => handleSpeakPress(item)
+                    : undefined
+                }
+              />
+            )}
             scrollEventThrottle={16}
             showsVerticalScrollIndicator={false}
             style={styles.flex}
