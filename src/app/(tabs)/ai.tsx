@@ -21,6 +21,7 @@ import { AiChatBubble } from "@/components/ai/chat-bubble";
 import { AiChatComposer } from "@/components/ai/chat-composer";
 import { AiEmptyChat } from "@/components/ai/empty-chat";
 import { AiLiveError, AiLiveStatus } from "@/components/ai/live-status";
+import { AiOfflineEmpty } from "@/components/ai/offline-empty";
 import { AppText } from "@/components/ui/app-text";
 import { useGeminiLiveChat } from "@/hooks/use-gemini-live-chat";
 import useThemeManager from "@/hooks/use-theme-manager";
@@ -130,78 +131,88 @@ export default function AiScreen() {
               numberOfLines={1}
               style={[styles.subtitle, { color: colors.mutedForeground }]}
             >
-              {t("aiLiveSubtitle")}
+              {isOffline ? t("aiOfflineTitle") : t("aiLiveSubtitle")}
             </AppText>
           </View>
 
-          <View style={styles.headerActions}>
-            <AiLiveStatus onRetry={reconnect} status={status} />
+          {isOffline ? null : (
+            <View style={styles.headerActions}>
+              <AiLiveStatus onRetry={reconnect} status={status} />
 
-            {messages.length > 0 ? (
-              <Pressable
-                accessibilityLabel={t("aiClearChat")}
-                accessibilityRole="button"
-                hitSlop={8}
-                onPress={confirmClear}
-                style={({ pressed }) => [
-                  styles.clearButton,
-                  { opacity: pressed ? 0.5 : 1 },
-                ]}
-              >
-                <Ionicons
-                  color={colors.mutedForeground}
-                  name="trash-outline"
-                  size={19}
-                />
-              </Pressable>
-            ) : null}
-          </View>
+              {messages.length > 0 ? (
+                <Pressable
+                  accessibilityLabel={t("aiClearChat")}
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  onPress={confirmClear}
+                  style={({ pressed }) => [
+                    styles.clearButton,
+                    { opacity: pressed ? 0.5 : 1 },
+                  ]}
+                >
+                  <Ionicons
+                    color={colors.mutedForeground}
+                    name="trash-outline"
+                    size={19}
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          )}
         </View>
 
-        <AiLiveError errorCode={errorCode} onDismissError={dismissError} />
+        {isOffline ? (
+          <AiOfflineEmpty />
+        ) : (
+          <>
+            <AiLiveError errorCode={errorCode} onDismissError={dismissError} />
 
-        <KeyboardGestureArea
-          interpolator="ios"
-          style={styles.flex}
-          textInputNativeID={COMPOSER_NATIVE_ID}
-        >
-          <FlatList
-            contentContainerStyle={[
-              styles.messages,
-              messages.length === 0 && styles.emptyMessages,
-            ]}
-            data={messages}
-            keyExtractor={(message) => message.id}
-            keyboardDismissMode="interactive"
-            keyboardShouldPersistTaps="handled"
-            ListEmptyComponent={
-              <AiEmptyChat onSelectSuggestion={setDraft} />
-            }
-            onContentSizeChange={() => scrollToBottomIfPinned(messages.length > 1)}
-            onScroll={handleScroll}
-            ref={listRef}
-            renderItem={renderMessage}
-            scrollEventThrottle={16}
-            showsVerticalScrollIndicator={false}
-            style={styles.flex}
-          />
-        </KeyboardGestureArea>
+            <KeyboardGestureArea
+              interpolator="ios"
+              style={styles.flex}
+              textInputNativeID={COMPOSER_NATIVE_ID}
+            >
+              <FlatList
+                contentContainerStyle={[
+                  styles.messages,
+                  messages.length === 0 && styles.emptyMessages,
+                ]}
+                data={messages}
+                keyExtractor={(message) => message.id}
+                keyboardDismissMode="interactive"
+                keyboardShouldPersistTaps="handled"
+                ListEmptyComponent={
+                  <AiEmptyChat onSelectSuggestion={setDraft} />
+                }
+                onContentSizeChange={() =>
+                  scrollToBottomIfPinned(messages.length > 1)
+                }
+                onScroll={handleScroll}
+                ref={listRef}
+                renderItem={renderMessage}
+                scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
+                style={styles.flex}
+              />
+            </KeyboardGestureArea>
 
-        <AiChatComposer
-          image={image}
-          isModelSpeaking={isModelSpeaking}
-          isRecording={isRecording}
-          nativeID={COMPOSER_NATIVE_ID}
-          onChangeText={setDraft}
-          onChooseImage={() => void chooseFromLibrary()}
-          onClearImage={clearImage}
-          onSend={handleSend}
-          onStopModelAudio={stopModelAudio}
-          onTakePhoto={() => void takePhoto()}
-          onToggleMic={toggleMic}
-          status={status}
-          text={draft}
-        />
+            <AiChatComposer
+              image={image}
+              isModelSpeaking={isModelSpeaking}
+              isRecording={isRecording}
+              nativeID={COMPOSER_NATIVE_ID}
+              onChangeText={setDraft}
+              onChooseImage={() => void chooseFromLibrary()}
+              onClearImage={clearImage}
+              onSend={handleSend}
+              onStopModelAudio={stopModelAudio}
+              onTakePhoto={() => void takePhoto()}
+              onToggleMic={toggleMic}
+              status={status}
+              text={draft}
+            />
+          </>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

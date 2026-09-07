@@ -9,6 +9,7 @@ import type {
 
 type Options = {
   farmerContext: string;
+  isModelCached?: boolean;
   language: LanguageCode;
 };
 

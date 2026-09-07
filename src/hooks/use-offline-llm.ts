@@ -11,7 +11,10 @@ import {
   buildOfflineSystemPrompt,
   sanitizeOfflineReply,
 } from "@/services/offline-llm/prompt";
-import { getOfflineModel } from "@/services/offline-llm/runtime";
+import {
+  getOfflineModel,
+  isOfflineModelCached,
+} from "@/services/offline-llm/runtime";
 import type {
   OfflineChatMessage,
   OfflineLlmErrorCode,
@@ -20,6 +23,7 @@ import type {
 
 type Options = {
   farmerContext: string;
+  isModelCached?: boolean;
   language: LanguageCode;
 };
 
@@ -27,7 +31,11 @@ function createId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function useOfflineLlm({ farmerContext, language }: Options) {
+export function useOfflineLlm({
+  farmerContext,
+  isModelCached = false,
+  language,
+}: Options) {
   const model = useMemo(() => getOfflineModel(), []);
   const llm = useLLM({ model });
   const {
@@ -43,9 +51,28 @@ export function useOfflineLlm({ farmerContext, language }: Options) {
   const [messages, setMessages] = useState<OfflineChatMessage[]>([]);
   const [generateError, setGenerateError] =
     useState<OfflineLlmErrorCode | null>(null);
+  const [filesCached, setFilesCached] = useState(isModelCached);
   const sendingRef = useRef(false);
   const interruptedRef = useRef(false);
   const messagesRef = useRef<OfflineChatMessage[]>([]);
+
+  useEffect(() => {
+    if (isModelCached) {
+      setFilesCached(true);
+      return;
+    }
+
+    let active = true;
+    void isOfflineModelCached().then((cached) => {
+      if (active) {
+        setFilesCached(cached);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [isModelCached]);
 
   useEffect(() => {
     messagesRef.current = messages;
@@ -106,16 +133,12 @@ export function useOfflineLlm({ farmerContext, language }: Options) {
       return "ready";
     }
 
-    if (downloadProgress > 0 && downloadProgress < 1) {
-      return "downloading";
-    }
-
-    if (downloadProgress >= 1) {
+    if (filesCached || downloadProgress >= 1) {
       return "loading";
     }
 
     return "downloading";
-  }, [downloadProgress, error, isGenerating, isReady]);
+  }, [downloadProgress, error, filesCached, isGenerating, isReady]);
 
   const errorCode: OfflineLlmErrorCode | null = error
     ? mapOfflineLlmError(error)

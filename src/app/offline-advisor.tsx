@@ -157,10 +157,22 @@ export default function OfflineAdvisorScreen() {
     );
   }
 
-  return <OfflineAdvisorEngine key={engineKey} onRetry={retryEngine} />;
+  return (
+    <OfflineAdvisorEngine
+      isModelCached={status === "downloaded"}
+      key={engineKey}
+      onRetry={retryEngine}
+    />
+  );
 }
 
-function OfflineAdvisorEngine({ onRetry }: { onRetry: () => void }) {
+function OfflineAdvisorEngine({
+  isModelCached,
+  onRetry,
+}: {
+  isModelCached: boolean;
+  onRetry: () => void;
+}) {
   const { colors } = useThemeManager();
   const { language, t } = useLanguage();
   const { isOffline } = useNetwork();
@@ -185,7 +197,7 @@ function OfflineAdvisorEngine({ onRetry }: { onRetry: () => void }) {
     messages,
     phase,
     sendMessage,
-  } = useOfflineLlm({ farmerContext, language });
+  } = useOfflineLlm({ farmerContext, isModelCached, language });
 
   useLayoutEffect(() => {
     generatingRef.current = isGenerating;
@@ -266,8 +278,16 @@ function OfflineAdvisorEngine({ onRetry }: { onRetry: () => void }) {
 
         leaveAlertOpenRef.current = true;
         Alert.alert(
-          t("offlineLeaveDownloadTitle"),
-          t("offlineLeaveDownloadDescription"),
+          t(
+            phase === "loading"
+              ? "offlineLeaveLoadTitle"
+              : "offlineLeaveDownloadTitle",
+          ),
+          t(
+            phase === "loading"
+              ? "offlineLeaveLoadDescription"
+              : "offlineLeaveDownloadDescription",
+          ),
           [
             {
               onPress: () => {
