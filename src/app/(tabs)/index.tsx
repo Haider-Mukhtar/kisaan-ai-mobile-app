@@ -27,19 +27,7 @@ export default function HomeScreen() {
       edges={{ top: !isOffline }}
       style={[styles.safeArea, { backgroundColor: colors.background }]}
     >
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            colors={[colors.primaryDark]}
-            onRefresh={() => void refresh()}
-            refreshing={isRefreshing}
-            tintColor={colors.primaryDark}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.header}>
         <AppText
           variant="label"
           style={[styles.appName, { color: colors.primaryDark }]}
@@ -59,10 +47,22 @@ export default function HomeScreen() {
         >
           {t("homeSubtitle")}
         </AppText>
+      </View>
 
-        <View style={styles.alerts}>
-          <HomeAlerts />
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl
+            colors={[colors.primaryDark]}
+            onRefresh={() => void refresh()}
+            refreshing={isRefreshing}
+            tintColor={colors.primaryDark}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+        style={styles.scroll}
+      >
+        <HomeAlerts />
 
         <Pressable
           accessibilityHint={t("homeBlogsHint")}
@@ -113,15 +113,19 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
-  content: {
-    paddingBottom: 32,
+  header: {
     paddingHorizontal: 20,
     paddingTop: 12,
+  },
+  scroll: { flex: 1 },
+  content: {
+    paddingBottom: 92,
+    paddingHorizontal: 20,
+    paddingTop: 22,
   },
   appName: { fontSize: 14, lineHeight: 26 },
   greeting: { fontSize: 26, lineHeight: 44 },
   subtitle: { fontSize: 14, lineHeight: 25, marginTop: 2 },
-  alerts: { marginTop: 22 },
   blogButton: {
     alignItems: "center",
     borderCurve: "continuous",
