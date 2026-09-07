@@ -223,6 +223,22 @@ function ThemedRootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="blogs"
+                  options={{
+                    headerBackTitle: t("tabHome"),
+                    headerShown: true,
+                    title: t("blogsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="blog/[slug]"
+                  options={{
+                    headerBackTitle: t("blogsTitle"),
+                    headerShown: true,
+                    title: t("blogDetailsTitle"),
+                  }}
+                />
+                <Stack.Screen
                   name="alert/[id]"
                   options={{
                     headerBackTitle: t("alertsTitle"),

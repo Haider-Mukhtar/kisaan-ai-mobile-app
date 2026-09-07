@@ -419,5 +419,20 @@
   "alertWindAction": "Delay spraying, secure loose covers and supports, and inspect taller crops after the wind passes.",
   "alertDiseaseRiskTitle": "Wet-weather disease risk",
   "alertDiseaseRiskBody": "Repeated wet or very humid conditions may increase fungal disease risk. This is a weather-based risk, not a confirmed outbreak.",
-  "alertDiseaseRiskAction": "Inspect lower leaves and dense growth each day, improve airflow where practical, avoid wetting leaves late in the day and ask a local expert before treating."
+  "alertDiseaseRiskAction": "Inspect lower leaves and dense growth each day, improve airflow where practical, avoid wetting leaves late in the day and ask a local expert before treating.",
+  "homeBlogsTitle": "Crop guides & articles",
+  "homeBlogsBody": "Read the latest farming advice in English and Urdu",
+  "homeBlogsHint": "Opens the latest crop guides and farming articles",
+  "blogsTitle": "Crop guides",
+  "blogsIntro": "The five latest farming articles from IR Farm, available in English and Urdu.",
+  "blogsLoadingTitle": "Growing your reading list…",
+  "blogsLoadingBody": "Fetching the latest farming articles.",
+  "blogsErrorTitle": "Articles are unavailable",
+  "blogsErrorBody": "Check your connection and pull down to try again.",
+  "blogReadArticle": "Read article",
+  "blogLatestBadge": "Newest",
+  "blogOpenHint": "Opens the full article",
+  "blogDetailsTitle": "Article",
+  "blogMissingTitle": "Article not found",
+  "blogMissingBody": "It may have been replaced by a newer article. Return to the list and refresh."
 }
