@@ -1,6 +1,7 @@
 import { RefreshControl, ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-screens/experimental";
 
+import { OfflineAdvisorCard } from "@/components/offline/offline-advisor-card";
 import { AppText } from "@/components/ui/app-text";
 import { WeatherCard } from "@/components/weather/weather-card";
 import useThemeManager from "@/hooks/use-theme-manager";
@@ -59,6 +60,10 @@ export default function HomeScreen() {
         <View style={styles.weather}>
           <WeatherCard />
         </View>
+
+        <View style={styles.offline}>
+          <OfflineAdvisorCard />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -75,4 +80,5 @@ const styles = StyleSheet.create({
   greeting: { fontSize: 26, lineHeight: 44 },
   subtitle: { fontSize: 14, lineHeight: 25, marginTop: 2 },
   weather: { marginTop: 20 },
+  offline: { marginTop: 14 },
 });

@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon.png",
+      "deploymentTarget": "17.0",
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Kisaan AI uses your microphone for live voice conversations about your farm.",
         "ExpoLocalization_supportsRTL": true,
@@ -89,6 +90,14 @@
           ],
           "androidForegroundService": false,
           "disableFFmpeg": true
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 33
+          }
         }
       ]
     ],
