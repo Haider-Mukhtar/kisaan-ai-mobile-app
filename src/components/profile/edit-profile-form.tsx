@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 import { OnboardingButton } from "@/components/onboarding/onboarding-button";
 import { CropSelector } from "@/components/profile/crop-selector";
@@ -68,8 +69,8 @@ export function EditProfileForm() {
   };
 
   return (
-    <ScrollView
-      automaticallyAdjustKeyboardInsets
+    <KeyboardAwareScrollView
+      bottomOffset={20}
       contentContainerStyle={styles.content}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
@@ -166,7 +167,7 @@ export function EditProfileForm() {
         label={isSaving ? t("farmProfileSaving") : t("editProfileSave")}
         onPress={() => void save()}
       />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 

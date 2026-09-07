@@ -25,10 +25,7 @@ import toastConfig from "@/components/toast-config";
 import { Fonts } from "@/constants/theme";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { AuthProvider, useAuth } from "@/providers/auth-provider";
-import {
-  LanguageProvider,
-  useLanguage,
-} from "@/providers/language-provider";
+import { LanguageProvider, useLanguage } from "@/providers/language-provider";
 import { NetworkProvider, useNetwork } from "@/providers/network-provider";
 import {
   OnboardingProvider,
@@ -39,6 +36,7 @@ import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { WeatherProvider } from "@/providers/weather-provider";
 import "@/services/offline-llm/runtime";
+import { AlertsProvider } from "@/providers/alerts-provider";
 
 const SPLASH_FADE_DURATION = 300;
 
@@ -82,7 +80,9 @@ export default function RootLayout() {
                   <PhoneAuthProvider>
                     <OnboardingProvider>
                       <WeatherProvider>
-                        <ThemedRootLayout />
+                        <AlertsProvider>
+                          <ThemedRootLayout />
+                        </AlertsProvider>
                       </WeatherProvider>
                     </OnboardingProvider>
                   </PhoneAuthProvider>
@@ -104,21 +104,12 @@ function ThemedRootLayout() {
     isDarkMode,
     isReady: isThemeReady,
   } = useThemeManager();
-  const {
-    direction,
-    fonts,
-    isReady: isLanguageReady,
-    t,
-  } = useLanguage();
-  const {
-    isComplete: isOnboardingComplete,
-    isReady: isOnboardingReady,
-  } = useOnboarding();
+  const { direction, fonts, isReady: isLanguageReady, t } = useLanguage();
+  const { isComplete: isOnboardingComplete, isReady: isOnboardingReady } =
+    useOnboarding();
   const { isAuthenticated, isReady: isAuthReady } = useAuth();
-  const {
-    isComplete: isProfileComplete,
-    isReady: isProfileReady,
-  } = useProfile();
+  const { isComplete: isProfileComplete, isReady: isProfileReady } =
+    useProfile();
   const { isOffline } = useNetwork();
   const [minSplashElapsed, setMinSplashElapsed] = useState(false);
 
@@ -142,8 +133,7 @@ function ThemedRootLayout() {
   const showLogin = isOnboardingComplete && !isAuthenticated;
   const showProfileSetup =
     isOnboardingComplete && isAuthenticated && !isProfileComplete;
-  const showHome =
-    isOnboardingComplete && isAuthenticated && isProfileComplete;
+  const showHome = isOnboardingComplete && isAuthenticated && isProfileComplete;
 
   const baseTheme = effectiveTheme === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme: Theme = {
@@ -205,12 +195,43 @@ function ThemedRootLayout() {
                   }}
                 />
                 <Stack.Screen
-                  name="offline-advisor"
+                  name="weather-details"
                   options={{
-                    animation: "slide_from_right",
-                    headerBackTitle: t("back"),
+                    headerBackTitle: t("tabHome"),
                     headerShown: true,
-                    title: t("offlineTitle"),
+                    title: t("weatherDetailsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="alerts"
+                  options={{
+                    headerBackTitle: t("tabHome"),
+                    headerShown: true,
+                    title: t("alertsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="blogs"
+                  options={{
+                    headerBackTitle: t("tabHome"),
+                    headerShown: true,
+                    title: t("blogsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="blog/[slug]"
+                  options={{
+                    headerBackTitle: t("blogsTitle"),
+                    headerShown: true,
+                    title: t("blogDetailsTitle"),
+                  }}
+                />
+                <Stack.Screen
+                  name="alert/[id]"
+                  options={{
+                    headerBackTitle: t("alertsTitle"),
+                    headerShown: true,
+                    title: t("alertDetailsTitle"),
                   }}
                 />
                 <Stack.Screen
@@ -220,7 +241,7 @@ function ThemedRootLayout() {
                     contentStyle: { backgroundColor: colors.card },
                     headerShown: false,
                     presentation: "formSheet",
-                    sheetAllowedDetents: [0.70, 0.92],
+                    sheetAllowedDetents: [0.7, 0.92],
                     sheetCornerRadius: 28,
                     sheetGrabberVisible: true,
                     sheetInitialDetentIndex: 0,
@@ -239,7 +260,9 @@ function ThemedRootLayout() {
           </Animated.View>
         ) : null}
       </View>
-      <StatusBar style={showSplash || isDarkMode || isOffline ? "light" : "dark"} />
+      <StatusBar
+        style={showSplash || isDarkMode || isOffline ? "light" : "dark"}
+      />
     </NavigationThemeProvider>
   );
 }
