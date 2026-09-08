@@ -1,0 +1,361 @@
+VOICE-FIRST FARMING COMPANION
+Kisaan AI
+Practical farm intelligence,
+online and off the grid.
+A product case study of the Expo mobile app for smallholder
+farmers in Pakistan.
+THE PROMISE
+One trusted place for weather, market
+prices, crop learning and AI guidance -
+in the farmer's language.
+Simulator walkthrough  |  8 September 2026
+
+01  /  OPPORTUNITY
+The problem is not a lack of data. It is a lack of usable decisions.
+Smallholder farmers make time-sensitive choices while information is fragmented, technical, language-heavy, and often unavailable when connectivity drops.
+01
+Disconnected signals
+Weather, crop symptoms, local
+prices and field context live in
+separate channels. Farmers must
+connect the dots themselves.
+02
+Low-confidence advice
+A photo or generic answer can
+sound certain without
+acknowledging uncertainty, local
+conditions, or the need for
+verification.
+03
+Connectivity gaps
+Live services are least reliable
+in the places where farm
+decisions are made. A useful
+assistant must degrade
+gracefully.
+04
+Language and literacy
+Formal English and dense
+interfaces create friction.
+Farmers need simple wording, Urdu
+support, readable type and spoken
+output.
+Design challenge
+How might we turn live data, local context and AI into clear next actions - without excluding farmers who prefer Urdu, speech, or have no signal?
+KISAAN AI  /  PRODUCT CASE STUDY
+OPPORTUNITY
+02
+
+02  /  SOLUTION
+A single decision layer for the farmer's day
+Kisaan AI combines four practical jobs in one profile-aware, bilingual experience.
+Personalized home dashboard
+AI
+Ask
+Voice, text and crop photos connect the
+farmer to a live AI assistant with farm
+context.
+WX
+Prepare
+Local forecast, a farming advisory and risk
+alerts turn weather into a next action.
+RS
+Sell
+Daily mandi rates make price discovery
+searchable, bilingual and audible.
+OFF
+Keep working
+An on-device farm helper provides text
+guidance after a one-time model download.
+4
+PRIMARY JOBS
+2
+LANGUAGES
+1
+SHARED FARM PROFILE
+KISAAN AI  /  PRODUCT CASE STUDY
+SOLUTION
+03
+
+03  /  EXPERIENCE
+From first launch to a confident next action
+The experience captures only the context needed to personalize advice, then keeps the four daily jobs one tap away.
+1
+Choose
+Language and appearance
+2
+Identify
+Phone sign-in
+3
+Describe
+Farm, crops and size
+4
+Locate
+GPS or district picker
+5
+Act
+Home, AI, Mandi, Profile
+Profile as the shared context
+The same crops, district, farm size and
+preferred language inform weather, alerts, AI
+prompts and settings.
+Accessible interaction
+Large touch targets, bilingual labels, simple
+copy and text-to-speech reduce reading and
+navigation friction.
+Resilient by design
+Cached weather, prices and articles remain
+useful; the on-device helper covers farm Q&A
+without internet.
+KISAAN AI  /  PRODUCT CASE STUDY
+EXPERIENCE
+04
+
+04  /  LIVE AI
+A multimodal assistant grounded in the farmer's context
+Farmers can speak, type or attach a crop photo; the live session responds in simple English or everyday Urdu.
+Voice, text and crop photo
+1
+Conversation in the natural channel
+Voice-first controls reduce typing; text and photos support quiet or visual questions.
+2
+Context follows the farmer
+Crops, district, farm size and current app-provided mandi rates are included in the
+assistant context.
+3
+Practical local language
+Responses use Pakistani units and familiar terms for irrigation, selling and field work.
+4
+Safe starting points
+Suggested questions guide farmers toward crop leaves, watering and weather protection.
+Important boundary
+Live guidance can be wrong. The interface asks farmers to verify high-impact decisions locally.
+KISAAN AI  /  PRODUCT CASE STUDY
+LIVE AI
+05
+
+05  /  OFFLINE INTELLIGENCE
+Advice that stays available beyond the signal
+A compact Qwen3 model runs entirely on the phone after a one-time download, keeping farm Q&A available offline.
+On-device farm helper
+1
+No network required
+After the model is stored and loaded, text questions and answers stay on the device.
+2
+Same farmer context
+The helper uses the saved farm profile and language with a shorter prompt suited to a small
+model.
+3
+Honest capability framing
+The product labels it as simpler than live Kisaan AI and repeats the need to verify advice.
+4
+Accessible playback
+Answers can be read aloud using on-device text-to-speech.
+Resilience pattern
+Live AI for richer sessions; cached content and on-device inference for continuity.
+KISAAN AI  /  PRODUCT CASE STUDY
+OFFLINE INTELLIGENCE
+06
+
+06  /  WEATHER AND ALERTS
+Forecasts translated into farm actions
+The dashboard surfaces local conditions; the detail view adds a five-day outlook and a plain-language work advisory.
+Today's farm picture
+Five-day forecast
+1
+Location-aware
+Forecasts use GPS or a farmer-selected district across Pakistan's
+regions.
+2
+Action, not just weather
+Advisories connect dry, wet, hot, cold or windy conditions to spraying,
+watering and harvesting.
+3
+Prioritized risk
+Storm, rain, heat, frost, wind and wet-weather crop-risk alerts are
+ranked for the home screen.
+4
+Cache-aware
+A saved forecast remains visible offline and the UI communicates when
+the data is not fresh.
+Data source
+Open-Meteo powers forecasts; a shared Supabase cache reduces duplicate
+district fetches.
+KISAAN AI  /  PRODUCT CASE STUDY
+WEATHER AND ALERTS
+07
+
+07  /  MARKET ACCESS
+Daily mandi rates farmers can search and hear
+Produce prices are presented in English and Urdu with national averages, city ranges, trend and spoken playback.
+Searchable daily list
+City price breakdown
+1
+Fast price discovery
+Search works across English and Urdu names for dozens of produce items.
+2
+Useful granularity
+Each detail sheet shows an average, daily movement and city-level price
+ranges.
+3
+Speech playback
+A listen action makes price information available without sustained
+reading.
+4
+Offline continuity
+The latest device-cached list stays available when the network drops.
+Current scope
+Lahore, Karachi, Multan and Islamabad are shown from the daily IR Farm
+source.
+KISAAN AI  /  PRODUCT CASE STUDY
+MARKET ACCESS
+08
+
+08  /  LEARNING
+Crop guides in both languages
+Five current farming articles support deeper learning, with English and Urdu available inside each article.
+Latest crop guides
+Bilingual article view
+1
+Curated and current
+The app fetches the five latest guides and highlights the newest item.
+2
+Bilingual reading
+A language switch keeps English and Urdu content together in one
+article experience.
+3
+Visual explanation
+Illustrated cover graphics make long-form agricultural topics easier to
+scan.
+4
+Offline reading
+Device caching keeps recently fetched guidance available without a
+connection.
+Content role
+Guides complement AI answers with longer, source-based educational
+material.
+KISAAN AI  /  PRODUCT CASE STUDY
+LEARNING
+09
+
+09  /  PERSONALIZATION
+One profile, many tailored experiences
+Farm details and preferences are managed in one place and reused throughout the app.
+Profile and preferences
+1
+Farm facts
+Name, village, nearest city, farm size, crops and district form the shared personalization
+layer.
+2
+Language
+English and Urdu can be changed immediately, including right-to-left layouts and appropriate
+fonts.
+3
+Appearance
+System, light and dark modes adapt the interface to farmer preference and environment.
+4
+Control
+Farmers can edit details, change location, repeat onboarding or sign out.
+Privacy note
+The phone number in this case study screenshot is intentionally redacted.
+KISAAN AI  /  PRODUCT CASE STUDY
+PERSONALIZATION
+10
+
+10  /  PRODUCT ARCHITECTURE
+How the product turns signals into guidance
+Expo SDK 57 and React Native provide the mobile shell; providers coordinate shared farm context, network state and cached data.
+ FARMER INPUT
+Voice
+Text
+Crop photo
+Location
+Farm profile
+v
+APP LAYER
+Expo Router
+English + Urdu
+Theme
+Network state
+Device cache
+v
+INTELLIGENCE
+Gemini Live
+Qwen3 0.6B
+Weather rules
+Farmer context
+Safety prompt
+v
+DATA SERVICES
+Open-Meteo
+IR Farm
+Supabase
+GPS/districts
+On-device TTS
+SDK 57
+EXPO + REACT NATIVE 0.86
+LOCAL-FIRST
+CACHE + ON-DEVICE MODEL
+CONTEXTUAL
+PROFILE + DISTRICT + RATES
+KISAAN AI  /  PRODUCT CASE STUDY
+ARCHITECTURE
+11
+
+11  /  SAFETY AND READINESS
+Trust comes from clear boundaries
+The prototype already communicates uncertainty, but production readiness depends on stronger identity, secrets and service architecture.
+ ALREADY DESIGNED IN
+BEFORE PRODUCTION
+1
+Visible uncertainty
+The AI and offline helper warn that guidance can be wrong and
+important decisions should be checked locally.
+2
+Careful crop-photo framing
+Guidance describes visible symptoms and offers likely causes rather
+than claiming a certain diagnosis.
+3
+Weather risk, not disease proof
+Wet-weather disease alerts are presented as a risk signal, not a
+confirmed outbreak.
+4
+Graceful degradation
+Cached content and the offline helper keep the product useful when
+live services fail.
+1
+Replace demo OTP
+Current prototype OTP is generated on-device. Production must use a
+real SMS verification flow.
+2
+Move secrets server-side
+Gemini credentials and scraping logic should not ship as production
+client wiring.
+3
+Validate sources and freshness
+Show timestamps, source attribution and failure states for prices,
+articles and forecasts.
+4
+Field-test language and advice
+Test Urdu, speech, comprehension and agricultural usefulness with
+farmers and local experts.
+Product principle
+Kisaan AI should support judgment, not replace it. The interface must make source, freshness, uncertainty and next verification steps easy to understand.
+KISAAN AI  /  PRODUCT CASE STUDY
+SAFETY
+12
+
+CONCLUSION
+Useful today.
+Resilient tomorrow.
+Kisaan AI brings the farmer's most common information and advice
+needs into one clear mobile workflow.
+One shared farm profile personalizes every module.
+Bilingual text, voice and imagery widen access.
+Live intelligence is backed by practical offline paths.
+Weather and mandi data lead to decisions, not dashboards alone.
+NORTH STAR
+Help a farmer make the next good decision - wherever the field is.
+KISAAN AI  /  PRODUCT CASE STUDY
+SUMMARY
+13
