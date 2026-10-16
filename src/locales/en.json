@@ -256,6 +256,8 @@
   "profileTitle": "Your profile",
   "profileDescription": "Your farm, preferences and account in one place.",
   "profileSignedIn": "Signed in",
+  "profileMoreCrops": "+{{count}} more",
+  "profileShowLessCrops": "Show less",
   "profilePreferencesTitle": "APP PREFERENCES",
   "profileLanguageAccessibility": "Choose app language",
   "profileThemeAccessibility": "Choose app appearance",

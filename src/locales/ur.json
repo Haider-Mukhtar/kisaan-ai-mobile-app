@@ -256,6 +256,8 @@
   "profileTitle": "آپ کا پروفائل",
   "profileDescription": "اپنے کھیت، ترجیحات اور اکاؤنٹ کی معلومات ایک جگہ دیکھیں۔",
   "profileSignedIn": "سائن ان ہیں",
+  "profileMoreCrops": "مزید {{count}}",
+  "profileShowLessCrops": "کم دکھائیں",
   "profilePreferencesTitle": "ایپ کی ترجیحات",
   "profileLanguageAccessibility": "ایپ کی زبان منتخب کریں",
   "profileThemeAccessibility": "ایپ کا ظاہری انداز منتخب کریں",

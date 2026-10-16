@@ -196,19 +196,6 @@ export function MandiRateSheet({ id: rawId }: { id: string | string[] | undefine
             {t("mandiDetailTitle")}
           </AppText>
         </View>
-        <Pressable
-          accessibilityLabel={t("mandiDetailClose")}
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={closeSheet}
-          style={({ pressed }) => [
-            styles.closeButton,
-            { backgroundColor: colors.muted },
-            pressed && styles.pressed,
-          ]}
-        >
-          <Ionicons color={colors.foreground} name="close" size={18} />
-        </Pressable>
       </View>
 
       {status === "loading" ? (
@@ -434,13 +421,6 @@ const styles = StyleSheet.create({
   sheetTitle: {
     fontSize: 22,
     lineHeight: 34,
-  },
-  closeButton: {
-    alignItems: "center",
-    borderRadius: 17,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
   },
   content: {
     gap: 16,
