@@ -176,6 +176,9 @@ Copy `.env.example` to `.env` and fill in:
 | `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable (anon) key |
 | `EXPO_PUBLIC_GEMINI_API_KEY` | Gemini API key for live voice/chat (prototype only; do not ship a production key in the client) |
+| `GOOGLE_MAPS_API_KEY` | Google Maps SDK for Android key, read by `app.config.js` during native builds |
+
+Set `GOOGLE_MAPS_API_KEY` in the local `.env` and in the EAS environment used for cloud builds. Rebuild the Android app after changing it; a JavaScript reload will not update the native Maps key.
 
 Apply the SQL in `supabase/migrations/` to the same project. In Supabase Auth, **disable “Confirm email”** — phone login currently creates a synthetic email user and needs an immediate session.
 
