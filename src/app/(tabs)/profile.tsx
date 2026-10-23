@@ -68,6 +68,10 @@ export default function ProfileScreen() {
     profile?.farmSizeAcres !== null && profile?.farmSizeAcres !== undefined
       ? t("settingsAcres", { value: profile.farmSizeAcres })
       : t("settingsNotProvided");
+  const boundaryStatus =
+    profile?.location?.polygonBoundary && profile.location.polygonBoundary.length === 4
+      ? t("fieldBoundaryStatusSaved")
+      : t("fieldBoundaryStatusNotSet");
   const themeOptions: PreferenceOption<ThemePreference>[] = [
     { value: "system", label: t("themeSystem"), icon: "◐" },
     { value: "light", label: t("themeLight"), icon: "☀" },
@@ -114,6 +118,8 @@ export default function ProfileScreen() {
         />
 
         <FarmOverview
+          boundaryLabel={t("settingsBoundary")}
+          boundaryStatus={boundaryStatus}
           city={profile?.city || t("settingsNotProvided")}
           cityLabel={t("settingsCity")}
           crops={cropLabels}
@@ -162,6 +168,11 @@ export default function ProfileScreen() {
           icon="📍"
           label={t("locationChangeTitle")}
           onPress={() => router.push("/change-location")}
+        />
+        <ActionButton
+          icon="🗺️"
+          label={t("advancedFieldSetupTitle")}
+          onPress={() => router.push("/field-mapping")}
         />
         <ActionButton
           disabled={isResetting}
@@ -296,6 +307,8 @@ function ProfileIdentityCard({
 type IoniconName = ComponentProps<typeof Ionicons>["name"];
 
 function FarmOverview({
+  boundaryLabel,
+  boundaryStatus,
   city,
   cityLabel,
   crops,
@@ -309,6 +322,8 @@ function FarmOverview({
   village,
   villageLabel,
 }: {
+  boundaryLabel: string;
+  boundaryStatus: string;
   city: string;
   cityLabel: string;
   crops: string[];
@@ -383,6 +398,12 @@ function FarmOverview({
             isRTL={isRTL}
             label={farmSizeLabel}
             value={farmSize}
+          />
+          <FarmMeta
+            icon="map-outline"
+            isRTL={isRTL}
+            label={boundaryLabel}
+            value={boundaryStatus}
           />
           <CollapsibleCropsMeta
             crops={crops}

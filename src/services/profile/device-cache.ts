@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type {
   FarmLocation,
   FarmerProfile,
+  LatLng,
   LocationSource,
 } from "@/services/supabase/profiles";
 
@@ -28,13 +29,26 @@ function isFarmLocation(value: unknown): value is FarmLocation {
 
   const candidate = value as Partial<FarmLocation>;
 
+  const hasValidPolygon =
+    candidate.polygonBoundary === undefined ||
+    candidate.polygonBoundary === null ||
+    (Array.isArray(candidate.polygonBoundary) &&
+      candidate.polygonBoundary.every(
+        (p) =>
+          typeof p === "object" &&
+          p !== null &&
+          typeof (p as LatLng).latitude === "number" &&
+          typeof (p as LatLng).longitude === "number",
+      ));
+
   return (
     typeof candidate.districtId === "string" &&
     typeof candidate.latitude === "number" &&
     Number.isFinite(candidate.latitude) &&
     typeof candidate.longitude === "number" &&
     Number.isFinite(candidate.longitude) &&
-    LOCATION_SOURCES.includes(candidate.source as LocationSource)
+    LOCATION_SOURCES.includes(candidate.source as LocationSource) &&
+    Boolean(hasValidPolygon)
   );
 }
 

@@ -1,4 +1,5 @@
 import { MANDI_CITIES, type MandiSnapshot } from "@/services/mandi/types";
+import type { SatelliteHealthSnapshot } from "@/services/satelliteService";
 
 export const GEMINI_LIVE_CONFIG = {
   model: "gemini-3.1-flash-live-preview",
@@ -105,6 +106,7 @@ export function buildSystemInstruction(
   language: "en" | "ur",
   farmerContext = "",
   mandiSnapshot: MandiSnapshot | null = null,
+  satelliteSnapshot: SatelliteHealthSnapshot | null = null,
 ): string {
   const responseLanguage =
     language === "ur"
@@ -119,7 +121,8 @@ export function buildSystemInstruction(
       : "Reply in clear, simple spoken English unless the farmer asks for another language. Use the local crop names tomato, potato, and wheat, and Pakistani farm terms such as canal turn, mandi, and acre.";
 
   const mandiRatesInstruction = buildMandiRatesInstruction(mandiSnapshot);
-  const base = `${KISAAN_AI_SYSTEM_INSTRUCTION}\n\n${responseLanguage}${mandiRatesInstruction}`;
+  const satelliteInstruction = buildSatelliteInstruction(satelliteSnapshot);
+  const base = `${KISAAN_AI_SYSTEM_INSTRUCTION}\n\n${responseLanguage}${mandiRatesInstruction}${satelliteInstruction}`;
 
   if (!farmerContext.trim()) {
     return `${base}\n\nNo saved farm profile is available. Ask for crop and district only when that changes the advice.`;
@@ -130,6 +133,29 @@ export function buildSystemInstruction(
 This farmer's saved profile is current ground truth. Tailor crop, weather, pest, soil, irrigation, and calendar advice to these crops and this area of Pakistan. Do not invent extra personal details. If they ask about a crop they do not grow, still help, but default to their listed crops.
 
 ${farmerContext.trim()}`;
+}
+
+function buildSatelliteInstruction(
+  snapshot: SatelliteHealthSnapshot | null,
+): string {
+  if (!snapshot) {
+    return "";
+  }
+
+  const { metrics, satelliteName, daysAgo } = snapshot;
+  return `
+
+SATELLITE FIELD HEALTH & CROP VIGOR (SENTINEL-2 NDVI) — APP-PROVIDED SENSOR TELEMETRY
+The app has recent multispectral observation from ${satelliteName} (10-meter surface resolution) taken ~${daysAgo} days ago for this farm:
+- NDVI Score: ${metrics.ndvi.toFixed(2)} / 1.00 [Crop Vigor: ${metrics.healthStatus.toUpperCase()}]
+- Canopy Vegetation Density: ${metrics.vegetationDensity}%
+- Moisture Index: ${metrics.moistureLevel}% (${metrics.moistureStatus})
+- Cloud Coverage: ${metrics.cloudCoverage}%
+
+LIVE SATELLITE GUIDANCE & UNCERTAINTY RULES:
+1. When asked about crop health, field condition, watering, or vigor, refer to this satellite NDVI reading in conversational, everyday terms (e.g., mention that the satellite observation from 3 days ago shows good green canopy vigor at ${metrics.ndvi.toFixed(2)}).
+2. Visible Uncertainty: Satellite sensors observe the upper canopy from 10 meters above. Emphasize that satellite scores cannot detect underground root pests, early fungal spores under leaves, or virus spread.
+3. Actionable next step: If NDVI indicates stress or alert, advise the farmer to scout that patch in person to check soil moisture and leaf undersides before making any spray or fertilizer purchase. Never recommend chemical spraying based solely on an NDVI score.`;
 }
 
 function buildMandiRatesInstruction(snapshot: MandiSnapshot | null): string {

@@ -8,12 +8,19 @@ export type LocationSource = "gps" | "manual" | "default";
 
 const LOCATION_SOURCES: LocationSource[] = ["gps", "manual", "default"];
 
+export type LatLng = {
+  latitude: number;
+  longitude: number;
+};
+
 export type FarmLocation = {
   /** District id from `@/constants/districts`. */
   districtId: string;
   latitude: number;
   longitude: number;
   source: LocationSource;
+  /** Optional 4-point polygon boundary for advanced satellite monitoring. */
+  polygonBoundary?: LatLng[] | null;
 };
 
 export type FarmerProfile = {
@@ -56,11 +63,15 @@ function toFarmLocation(row: ProfileRow): FarmLocation | null {
     return null;
   }
 
+  const rawPolygon = (row as any).polygon_boundary;
+  const polygonBoundary = Array.isArray(rawPolygon) ? (rawPolygon as LatLng[]) : null;
+
   return {
     districtId: row.district,
     latitude,
     longitude,
     source: toLocationSource(row.location_source),
+    polygonBoundary,
   };
 }
 

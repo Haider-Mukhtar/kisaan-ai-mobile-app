@@ -8,6 +8,7 @@ import { useGeminiImage } from "@/hooks/use-gemini-image";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import { useProfile } from "@/providers/profile-provider";
+import { useSatelliteHealth } from "@/providers/satellite-provider";
 import { describeFarmerForGemini } from "@/services/gemini/farmer-context";
 import { GeminiLiveService } from "@/services/gemini/live-service";
 import type {
@@ -21,9 +22,10 @@ export function useGeminiLiveChat() {
   const { language } = useLanguage();
   const { isOnline } = useNetwork();
   const { profile } = useProfile();
+  const { snapshot: satelliteSnapshot } = useSatelliteHealth();
   const farmerContext = useMemo(
-    () => describeFarmerForGemini(profile),
-    [profile],
+    () => describeFarmerForGemini(profile, satelliteSnapshot),
+    [profile, satelliteSnapshot],
   );
   const [messages, setMessages] = useState<GeminiChatMessage[]>([]);
   const [status, setStatus] =
@@ -182,6 +184,7 @@ export function useGeminiLiveChat() {
         },
         farmerContext,
         language,
+        satelliteSnapshot,
       });
       serviceRef.current = service;
       if (isOnlineRef.current) {
@@ -215,6 +218,7 @@ export function useGeminiLiveChat() {
       configure,
       dispose,
       farmerContext,
+      satelliteSnapshot,
       finalizeTurn,
       handleAudioChunk,
       handleError,

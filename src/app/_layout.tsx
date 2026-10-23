@@ -35,6 +35,7 @@ import { PhoneAuthProvider } from "@/providers/phone-auth-provider";
 import { ProfileProvider, useProfile } from "@/providers/profile-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { WeatherProvider } from "@/providers/weather-provider";
+import { SatelliteProvider } from "@/providers/satellite-provider";
 import "@/services/offline-llm/runtime";
 import { AlertsProvider } from "@/providers/alerts-provider";
 
@@ -80,9 +81,11 @@ export default function RootLayout() {
                   <PhoneAuthProvider>
                     <OnboardingProvider>
                       <WeatherProvider>
-                        <AlertsProvider>
-                          <ThemedRootLayout />
-                        </AlertsProvider>
+                        <SatelliteProvider>
+                          <AlertsProvider>
+                            <ThemedRootLayout />
+                          </AlertsProvider>
+                        </SatelliteProvider>
                       </WeatherProvider>
                     </OnboardingProvider>
                   </PhoneAuthProvider>
