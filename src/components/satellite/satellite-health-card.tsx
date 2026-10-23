@@ -39,9 +39,9 @@ const STATUS_DESC_KEYS: Record<NDVIHealthStatus, TranslationKey> = {
 };
 
 const MOISTURE_KEYS: Record<MoistureStatus, TranslationKey> = {
-  adequate: "satelliteMoistureAdequate",
-  low: "satelliteMoistureLow",
-  surplus: "satelliteMoistureSurplus",
+  dry: "satelliteMoistureLow",
+  moderate: "satelliteMoistureAdequate",
+  optimal: "satelliteMoistureSurplus",
 };
 
 export function SatelliteHealthCard() {

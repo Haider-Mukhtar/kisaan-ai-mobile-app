@@ -4,7 +4,7 @@ import type { FarmLocation, LatLng } from "@/services/supabase/profiles";
 import { getDistrict } from "@/constants/districts";
 
 export type NDVIHealthStatus = "good" | "moderate" | "alert";
-export type MoistureStatus = "low" | "adequate" | "surplus";
+export type MoistureStatus = "dry" | "moderate" | "optimal";
 
 export type SatelliteMetrics = {
   ndvi: number;
@@ -38,17 +38,38 @@ export type SatelliteHealthSnapshot = {
   notes?: string;
 };
 
-const STORAGE_KEY_PREFIX = "kisaan-ai-satellite:";
+const STORAGE_KEY_PREFIX = "kisaan-ai-satellite:v2:";
+
+function sampleCoordinates(location: SatelliteLocation): LatLng[] {
+  const points =
+    location.polygonBoundary?.length === 4
+      ? location.polygonBoundary
+      : [{ latitude: location.latitude, longitude: location.longitude }];
+
+  // Pin order should not change the result for the same field.
+  return [...points].sort(
+    (a, b) => a.latitude - b.latitude || a.longitude - b.longitude,
+  );
+}
+
+function coordinateSignature(location: SatelliteLocation): string {
+  return sampleCoordinates(location)
+    .map((point) => `${point.latitude.toFixed(5)},${point.longitude.toFixed(5)}`)
+    .join(";");
+}
+
+function coordinateSeed(points: LatLng[], salt: number): number {
+  // Mix every pin (or the district point) into a stable 32-bit value.
+  let hash = salt;
+  for (const point of points) {
+    hash = Math.imul(hash ^ Math.round(point.latitude * 100_000), 16_777_619);
+    hash = Math.imul(hash ^ Math.round(point.longitude * 100_000), 16_777_619);
+  }
+  return (hash >>> 0) / 4_294_967_296;
+}
 
 function storageKey(location: SatelliteLocation): string {
-  const polygonTag =
-    location.polygonBoundary && location.polygonBoundary.length >= 4
-      ? "-polygon"
-      : "";
-  const identifier =
-    location.districtId ||
-    `${location.latitude.toFixed(2)},${location.longitude.toFixed(2)}`;
-  return `${STORAGE_KEY_PREFIX}${identifier}${polygonTag}`;
+  return `${STORAGE_KEY_PREFIX}${location.districtId ?? "field"}:${coordinateSignature(location)}`;
 }
 
 /**
@@ -70,17 +91,17 @@ export function classifyNdvi(ndvi: number): NDVIHealthStatus {
 
 export function classifyMoisture(level: number): MoistureStatus {
   if (level < 40) {
-    return "low";
+    return "dry";
   }
-  if (level > 80) {
-    return "surplus";
+  if (level < 60) {
+    return "moderate";
   }
-  return "adequate";
+  return "optimal";
 }
 
 /**
  * Simulates Sentinel-2 telemetry for a given location in Pakistan.
- * Generates deterministic, realistic values based on coordinate hashes and season.
+ * Generates deterministic demo values from the selected field or district coordinates.
  */
 export function simulateSentinel2Telemetry(
   location: SatelliteLocation,
@@ -101,40 +122,22 @@ export function simulateSentinel2Telemetry(
       location.polygonBoundary.reduce((sum, p) => sum + p.longitude, 0) / 4;
   }
 
-  // Deterministic seed from coordinates
-  const latSeed = Math.abs(Math.sin(effectiveLat * 12.9898) * 43758.5453);
-  const lonSeed = Math.abs(Math.sin(effectiveLon * 78.233) * 43758.5453);
-  const combinedSeed = (latSeed + lonSeed) % 1;
-
-  let ndvi: number;
-  if (isHighAccuracy) {
-    // High-accuracy polygon sampling yields localized, higher-precision NDVI
-    // Focused directly within the farm canopy without boundary soil/road bleed
-    const polygonPrecisionOffset = (combinedSeed * 0.08) - 0.02;
-    const baseNdvi = combinedSeed > 0.85 ? 0.42 : combinedSeed > 0.65 ? 0.58 : 0.74;
-    ndvi = Number(Math.max(0.15, Math.min(0.92, baseNdvi + polygonPrecisionOffset)).toFixed(2));
-  } else {
-    // Standard point / district fallback
-    if (combinedSeed > 0.88) {
-      ndvi = Number((0.28 + (combinedSeed % 0.1)).toFixed(2));
-    } else if (combinedSeed > 0.7) {
-      ndvi = Number((0.45 + (combinedSeed % 0.12)).toFixed(2));
-    } else {
-      ndvi = Number((0.68 + (combinedSeed % 0.11)).toFixed(2));
-    }
-  }
+  const points = sampleCoordinates(location);
+  const vigorSeed = coordinateSeed(points, 2_166_136_261);
+  const moistureSeed = coordinateSeed(points, 1_013_904_223);
+  const ndvi = Number((0.45 + vigorSeed * 0.4).toFixed(2));
 
   const healthStatus = classifyNdvi(ndvi);
   const vegetationDensity = Math.min(
-    95,
-    Math.max(20, Math.round(ndvi * 105 + (combinedSeed * 5 - 2.5))),
+    90,
+    Math.max(40, Math.round(ndvi * 100 + (moistureSeed - 0.5) * 8)),
   );
   const moistureLevel = Math.min(
-    88,
-    Math.max(25, Math.round(ndvi * 80 + (combinedSeed * 10 - 5))),
+    85,
+    Math.max(25, Math.round(28 + (ndvi - 0.45) * 120 + (moistureSeed - 0.5) * 14)),
   );
   const moistureStatus = classifyMoisture(moistureLevel);
-  const cloudCoverage = Math.max(1, Math.round(combinedSeed * 8));
+  const cloudCoverage = 2 + Math.round(coordinateSeed(points, 3_745_613_935) * 10);
 
   const daysAgo = 3;
   const capturedAt = new Date(
@@ -170,8 +173,8 @@ export function simulateSentinel2Telemetry(
     isHighAccuracy,
     accuracyMode,
     notes: isHighAccuracy
-      ? "Sentinel-2 L2A high-accuracy 4-point polygon sampled product"
-      : "Sentinel-2 L2A surface reflectance point-sample product",
+      ? "Demo simulation derived from the selected 4-point field boundary"
+      : "Demo simulation derived from the selected district or point coordinates",
   };
 }
 
@@ -272,12 +275,9 @@ export async function getSatelliteHealth(
     return simulated;
   }
 
-  // 2. When online, retrieve fresh Sentinel-2 telemetry
+  // 2. Regenerate immediately when the selected location changes
   try {
-    // Simulate brief network latency for realism
-    await new Promise((resolve) => setTimeout(resolve, 350));
     const telemetry = simulateSentinel2Telemetry(location);
-    telemetry.source = "network";
     await writeCachedSatelliteSnapshot(telemetry);
     return telemetry;
   } catch {
