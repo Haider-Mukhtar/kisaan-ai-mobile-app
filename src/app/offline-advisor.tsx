@@ -193,12 +193,13 @@ function OfflineAdvisorEngine({
     errorCode,
     interrupt,
     isGenerating,
+    isResolvingRate,
     isReady,
     loadError,
     messages,
     phase,
     sendMessage,
-  } = useOfflineLlm({ farmerContext, isModelCached, language });
+  } = useOfflineLlm({ farmerContext, isModelCached, isOffline, language });
   const { speakingId, stop: stopSpeech, toggle: toggleSpeech } =
     useSpeechPlayback();
 
@@ -475,7 +476,7 @@ function OfflineAdvisorEngine({
         </KeyboardGestureArea>
 
         <OfflineChatComposer
-          disabled={!isReady}
+          disabled={!isReady || isResolvingRate}
           isGenerating={isGenerating}
           nativeID={COMPOSER_NATIVE_ID}
           onChangeText={setDraft}

@@ -8,6 +8,16 @@ import {
 } from "@/services/offline-llm/config";
 import { mapOfflineLlmError } from "@/services/offline-llm/errors";
 import {
+  findMandiCity,
+  findMandiRatesInQuestion,
+  formatOfflineMandiPrice,
+  formatOfflineMandiSellingAdvice,
+  isMandiPriceFollowUp,
+  isMandiPriceQuestion,
+  isMandiSellingQuestion,
+  loadMandiSnapshotForOfflineHelper,
+} from "@/services/offline-llm/mandi";
+import {
   buildOfflineSystemPrompt,
   sanitizeOfflineReply,
 } from "@/services/offline-llm/prompt";
@@ -23,6 +33,7 @@ import type {
 
 type Options = {
   farmerContext: string;
+  isOffline: boolean;
   isModelCached?: boolean;
   language: LanguageCode;
 };
@@ -33,6 +44,7 @@ function createId() {
 
 export function useOfflineLlm({
   farmerContext,
+  isOffline,
   isModelCached = false,
   language,
 }: Options) {
@@ -51,6 +63,7 @@ export function useOfflineLlm({
   const [messages, setMessages] = useState<OfflineChatMessage[]>([]);
   const [generateError, setGenerateError] =
     useState<OfflineLlmErrorCode | null>(null);
+  const [isResolvingRate, setIsResolvingRate] = useState(false);
   const [filesCached, setFilesCached] = useState(isModelCached);
   const sendingRef = useRef(false);
   const interruptedRef = useRef(false);
@@ -58,7 +71,6 @@ export function useOfflineLlm({
 
   useEffect(() => {
     if (isModelCached) {
-      setFilesCached(true);
       return;
     }
 
@@ -133,12 +145,12 @@ export function useOfflineLlm({
       return "ready";
     }
 
-    if (filesCached || downloadProgress >= 1) {
+    if (filesCached || isModelCached || downloadProgress >= 1) {
       return "loading";
     }
 
     return "downloading";
-  }, [downloadProgress, error, filesCached, isGenerating, isReady]);
+  }, [downloadProgress, error, filesCached, isGenerating, isModelCached, isReady]);
 
   const errorCode: OfflineLlmErrorCode | null = error
     ? mapOfflineLlmError(error)
@@ -183,8 +195,102 @@ export function useOfflineLlm({
       setMessages((current) => [...current, userMessage, assistantMessage]);
 
       try {
+        const previousUserMessages = messagesRef.current
+          .filter((message) => message.role === "user")
+          .slice(-2);
+        const previousUserMessage = previousUserMessages.at(-1);
+        const previousPriceQuestion = [...previousUserMessages]
+          .reverse()
+          .find((message) =>
+            isMandiPriceQuestion(message.text) &&
+            !isMandiSellingQuestion(message.text),
+          );
+        const sellingQuestion = isMandiSellingQuestion(text);
+        const priceQuestion = !sellingQuestion && isMandiPriceQuestion(text)
+          ? text
+          : isMandiPriceFollowUp(text)
+            ? previousUserMessage && isMandiPriceQuestion(previousUserMessage.text) && !isMandiSellingQuestion(previousUserMessage.text)
+              ? previousUserMessage.text
+              : null
+            : null;
+        const marketAdviceQuestion = sellingQuestion || /\b(market|harvest)\b|منڈی/iu.test(text);
+        if (priceQuestion || marketAdviceQuestion) {
+          setIsResolvingRate(true);
+        }
+        const snapshot = priceQuestion || marketAdviceQuestion
+          ? await loadMandiSnapshotForOfflineHelper(isOffline)
+          : null;
+        const matchedRates = findMandiRatesInQuestion(
+          priceQuestion ?? text,
+          snapshot,
+        );
+
+        if (sellingQuestion) {
+          const contextualRates = matchedRates.length === 0 && /\b(this|that|it)\b|اس|یہ/iu.test(text)
+            ? findMandiRatesInQuestion(previousPriceQuestion?.text ?? "", snapshot)
+            : [];
+          const sellingRates = matchedRates.length ? matchedRates : contextualRates;
+          const directAnswer = sellingRates.length > 1
+            ? language === "ur"
+              ? "آپ کس فصل کو بیچنے کے بارے میں پوچھ رہے ہیں؟"
+              : "Which crop are you thinking of selling?"
+            : formatOfflineMandiSellingAdvice(
+                text,
+                sellingRates[0] ?? null,
+                snapshot,
+                language,
+              );
+
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantMessage.id
+                ? { ...message, text: directAnswer, isStreaming: false }
+                : message,
+            ),
+          );
+          return true;
+        }
+
+        if (priceQuestion) {
+          const directAnswer = !snapshot
+            ? language === "ur"
+              ? "اس فون میں منڈی کی محفوظ شدہ قیمتیں نہیں ہیں۔ انٹرنیٹ پر منڈی صفحہ کھول کر قیمتیں محفوظ کریں، پھر یہاں پوچھیں۔"
+              : "No mandi prices are saved on this phone yet. Open the Mandi page while online to save rates, then ask again."
+            : matchedRates.length > 1
+              ? language === "ur"
+                ? "آپ کس فصل کی منڈی قیمت پوچھ رہے ہیں؟"
+                : "Which crop's mandi price do you mean?"
+              : matchedRates.length === 0
+                ? language === "ur"
+                  ? "اس فصل کی قیمت محفوظ شدہ منڈی فہرست میں نہیں ملی۔ فصل کا نام بتائیں یا منڈی صفحہ دیکھیں۔"
+                  : "I couldn't find that crop in the saved mandi rates. Please name a listed crop or check the Mandi page."
+                : formatOfflineMandiPrice(
+                    matchedRates[0],
+                    snapshot,
+                    language,
+                    findMandiCity(priceQuestion) ?? findMandiCity(farmerContext),
+                  );
+
+          setMessages((current) =>
+            current.map((message) =>
+              message.id === assistantMessage.id
+                ? { ...message, text: directAnswer, isStreaming: false }
+                : message,
+            ),
+          );
+          return true;
+        }
+
+        const prompt = marketAdviceQuestion && matchedRates.length === 1
+          ? buildOfflineSystemPrompt(
+              language,
+              farmerContext,
+              matchedRates[0],
+              snapshot,
+            )
+          : systemPrompt;
         const reply = await generate([
-          { role: "system", content: systemPrompt },
+          { role: "system", content: prompt },
           ...historyForModel,
         ]);
         const cleaned = sanitizeOfflineReply(reply);
@@ -233,11 +339,12 @@ export function useOfflineLlm({
         );
         return false;
       } finally {
+        setIsResolvingRate(false);
         sendingRef.current = false;
         interruptedRef.current = false;
       }
     },
-    [generate, isGenerating, isReady, language, systemPrompt],
+    [farmerContext, generate, isGenerating, isOffline, isReady, language, systemPrompt],
   );
 
   const clearMessages = useCallback(() => {
@@ -269,6 +376,7 @@ export function useOfflineLlm({
     errorCode,
     interrupt,
     isGenerating,
+    isResolvingRate,
     isReady,
     loadError: error ? mapOfflineLlmError(error) : null,
     messages: visibleMessages,
