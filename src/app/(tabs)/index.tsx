@@ -6,11 +6,13 @@ import { OfflineAdvisorCard } from "@/components/offline/offline-advisor-card";
 import { AppText } from "@/components/ui/app-text";
 import { HomeAlerts } from "@/components/alerts/home-alerts";
 import { WeatherCard } from "@/components/weather/weather-card";
+import { SatelliteHealthCard } from "@/components/satellite/satellite-health-card";
 import useThemeManager from "@/hooks/use-theme-manager";
 import { useLanguage } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import { useProfile } from "@/providers/profile-provider";
 import { useWeather } from "@/providers/weather-provider";
+import { useSatelliteHealth } from "@/providers/satellite-provider";
 
 export default function HomeScreen() {
   const { colors } = useThemeManager();
@@ -18,8 +20,14 @@ export default function HomeScreen() {
   const { isOffline } = useNetwork();
   const router = useRouter();
   const { profile } = useProfile();
-  const { isRefreshing, refresh } = useWeather();
+  const { isRefreshing: isWeatherRefreshing, refresh: refreshWeather } = useWeather();
+  const { isRefreshing: isSatelliteRefreshing, refresh: refreshSatellite } = useSatelliteHealth();
+  const isRefreshing = isWeatherRefreshing || isSatelliteRefreshing;
   const firstName = profile?.fullName?.trim().split(/\s+/)[0] ?? "";
+
+  const handleRefresh = async () => {
+    await Promise.allSettled([refreshWeather(), refreshSatellite()]);
+  };
 
   return (
     <SafeAreaView
@@ -54,7 +62,7 @@ export default function HomeScreen() {
         refreshControl={
           <RefreshControl
             colors={[colors.primaryDark]}
-            onRefresh={() => void refresh()}
+            onRefresh={() => void handleRefresh()}
             refreshing={isRefreshing}
             tintColor={colors.primaryDark}
           />
@@ -101,6 +109,10 @@ export default function HomeScreen() {
 
         <View style={styles.weather}>
           <WeatherCard variant="summary" />
+        </View>
+
+        <View style={styles.satellite}>
+          <SatelliteHealthCard />
         </View>
 
         <View style={styles.offline}>
@@ -188,5 +200,6 @@ const styles = StyleSheet.create({
   },
   blogArrow: { color: "#FFFFFF", fontSize: 25, lineHeight: 28, textAlign: "center" },
   weather: { marginTop: 20 },
+  satellite: { marginTop: 14 },
   offline: { marginTop: 14 },
 });

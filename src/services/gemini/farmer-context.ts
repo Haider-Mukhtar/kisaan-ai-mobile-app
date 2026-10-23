@@ -1,5 +1,6 @@
 import { getDistrict, type ProvinceId } from "@/constants/districts";
 import type { FarmerProfile } from "@/services/supabase/profiles";
+import type { SatelliteHealthSnapshot } from "@/services/satelliteService";
 
 const CROP_EN: Record<string, string> = {
   potato: "potato",
@@ -27,6 +28,7 @@ function cropLabel(cropId: string) {
  */
 export function describeFarmerForGemini(
   profile: FarmerProfile | null,
+  satelliteSnapshot?: SatelliteHealthSnapshot | null,
 ): string {
   if (!profile) {
     return "";
@@ -66,6 +68,21 @@ export function describeFarmerForGemini(
   if (profile.location) {
     lines.push(
       `Coordinates: ${profile.location.latitude.toFixed(4)}, ${profile.location.longitude.toFixed(4)}`,
+    );
+    if (
+      profile.location.polygonBoundary &&
+      profile.location.polygonBoundary.length === 4
+    ) {
+      lines.push(
+        "Field Boundary: 4-point custom polygon boundary drawn by farmer (High accuracy satellite sampling active).",
+      );
+    }
+  }
+
+  if (satelliteSnapshot) {
+    const { metrics, daysAgo } = satelliteSnapshot;
+    lines.push(
+      `Field Satellite Health (Sentinel-2): NDVI ${metrics.ndvi.toFixed(2)} (${metrics.healthStatus} vigor, ${metrics.vegetationDensity}% canopy density, ${metrics.moistureLevel}% moisture, updated ${daysAgo} days ago)`,
     );
   }
 

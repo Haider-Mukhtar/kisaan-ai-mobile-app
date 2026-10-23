@@ -44,6 +44,7 @@ import {
 } from "@/providers/language-provider";
 import { useNetwork } from "@/providers/network-provider";
 import { useProfile } from "@/providers/profile-provider";
+import { useSatelliteHealth } from "@/providers/satellite-provider";
 import { describeFarmerForGemini } from "@/services/gemini/farmer-context";
 import {
   formatOfflineSize,
@@ -178,8 +179,9 @@ function OfflineAdvisorEngine({
   const { language, t } = useLanguage();
   const { isOffline } = useNetwork();
   const { profile } = useProfile();
+  const { snapshot: satelliteSnapshot } = useSatelliteHealth();
   const navigation = useNavigation();
-  const farmerContext = describeFarmerForGemini(profile);
+  const farmerContext = describeFarmerForGemini(profile, satelliteSnapshot);
   const [draft, setDraft] = useState("");
   const listRef = useRef<FlatList<OfflineChatMessage>>(null);
   const isNearBottomRef = useRef(true);

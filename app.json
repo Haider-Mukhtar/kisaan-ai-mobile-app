@@ -21,6 +21,11 @@
       "bundleIdentifier": "com.haiderdev1.KisaanAI"
     },
     "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyYourGeneratedKeyHere..."
+        }
+      },
       "softwareKeyboardLayoutMode": "resize",
       "icon": "./assets/images/icon.png",
       "adaptiveIcon": {
@@ -99,7 +104,8 @@
             "minSdkVersion": 33
           }
         }
-      ]
+      ],
+      "react-native-maps"
     ],
     "experiments": {
       "typedRoutes": true,

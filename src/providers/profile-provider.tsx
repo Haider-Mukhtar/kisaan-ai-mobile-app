@@ -23,6 +23,7 @@ import {
   type FarmLocation,
   type FarmProfileDraft,
   type FarmerProfile,
+  type LatLng,
 } from "@/services/supabase/profiles";
 import { normalizePakistaniMobile } from "@/utils/phone";
 import { showErrorToast, showSuccessToast } from "@/utils/toast";
@@ -40,6 +41,7 @@ type ProfileContextValue = {
    * onboarding, so the first successful call also completes the profile.
    */
   saveLocation: (location: FarmLocation) => Promise<boolean>;
+  savePolygonBoundary: (boundary: LatLng[] | null) => Promise<boolean>;
 };
 
 /**
@@ -168,6 +170,48 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     [ensureOnline, userId],
   );
 
+  const savePolygonBoundary = useCallback(
+    async (boundary: LatLng[] | null) => {
+      if (!userId || !loaded?.profile) {
+        return false;
+      }
+
+      setIsSaving(true);
+      try {
+        const currentLocation = loaded.profile.location;
+        const updatedLocation: FarmLocation = currentLocation
+          ? {
+              ...currentLocation,
+              polygonBoundary: boundary,
+            }
+          : {
+              districtId: "lahore",
+              latitude: boundary?.[0]?.latitude ?? 31.5204,
+              longitude: boundary?.[0]?.longitude ?? 74.3587,
+              source: "manual",
+              polygonBoundary: boundary,
+            };
+
+        const updatedProfile: FarmerProfile = {
+          ...loaded.profile,
+          location: updatedLocation,
+          locationUpdatedAt: new Date().toISOString(),
+        };
+
+        setLoaded({ userId, profile: updatedProfile });
+        await writeCachedProfile(updatedProfile);
+        showSuccessToast(tRef.current("fieldMappingSavedSuccess"));
+        return true;
+      } catch {
+        showErrorToast(tRef.current("locationSaveErrorTitle"));
+        return false;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [loaded, userId],
+  );
+
   const saveLocation = useCallback(
     async (location: FarmLocation) => {
       if (!userId || !ensureOnline()) {
@@ -216,6 +260,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
       isComplete: Boolean(isAuthenticated && profile?.isComplete),
       saveProfile,
       saveLocation,
+      savePolygonBoundary,
     };
   }, [
     isAuthReady,
@@ -223,6 +268,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     isSaving,
     loaded,
     saveLocation,
+    savePolygonBoundary,
     saveProfile,
     userId,
   ]);

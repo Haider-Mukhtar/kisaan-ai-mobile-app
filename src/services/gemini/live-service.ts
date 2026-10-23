@@ -13,18 +13,21 @@ import type {
 } from "@/services/gemini/types";
 import { loadMandiSnapshotForGemini } from "@/services/mandi/gemini-snapshot";
 import type { MandiSnapshot } from "@/services/mandi/types";
+import type { SatelliteHealthSnapshot } from "@/services/satelliteService";
 
 type LiveServiceOptions = {
   callbacks: GeminiLiveCallbacks;
   language: "en" | "ur";
   /** Preformatted farm profile block from `describeFarmerForGemini`. */
   farmerContext?: string;
+  satelliteSnapshot?: SatelliteHealthSnapshot | null;
 };
 
 export class GeminiLiveService {
   private readonly callbacks: GeminiLiveCallbacks;
   private readonly language: "en" | "ur";
   private readonly farmerContext: string;
+  private readonly satelliteSnapshot: SatelliteHealthSnapshot | null;
   private websocket: WebSocket | null = null;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
@@ -37,10 +40,16 @@ export class GeminiLiveService {
   private mandiSnapshotPrepared = false;
   private mandiSnapshotPreparation: Promise<void> | null = null;
 
-  constructor({ callbacks, language, farmerContext = "" }: LiveServiceOptions) {
+  constructor({
+    callbacks,
+    language,
+    farmerContext = "",
+    satelliteSnapshot = null,
+  }: LiveServiceOptions) {
     this.callbacks = callbacks;
     this.language = language;
     this.farmerContext = farmerContext;
+    this.satelliteSnapshot = satelliteSnapshot;
   }
 
   connect(isReconnect = false): void {
@@ -240,6 +249,7 @@ export class GeminiLiveService {
                 this.language,
                 this.farmerContext,
                 this.mandiSnapshot,
+                this.satelliteSnapshot,
               ),
             },
           ],
